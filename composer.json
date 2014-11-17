@@ -1,0 +1,19 @@
+{
+  "name": "etki/mvno-api-client",
+  "description": "A simple MVNO API client with limited functionality",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Etki",
+      "email": "etki@etki.name",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "Etki\\MvnoApiClient": "src/"
+  },
+  "require-dev": {
+    "codeception/codeception": "2.1.x-dev"
+  }
+}
