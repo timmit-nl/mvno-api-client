@@ -1,0 +1,26 @@
+build_settings:
+  ignore:
+    - vendor
+    - tests
+
+test:
+  php_parallel_lint:
+    directory: src
+  codeception:
+    config: codeception.yml
+  php_loc:
+    directory: src
+  php_mess_detector:
+    rules:
+      - codesize
+      - unusedcode
+      - naming
+      - controversial
+      - design
+      - migrations
+    path: src
+  php_code_sniffer:
+    path: src
+    encoding: utf-8
+    tab_width: 4
+    standard: "PSR1,PSR2"
