@@ -12,7 +12,7 @@ use Etki\MvnoApiClient\Credentials;
  * @package Etki\MvnoApiClient\Transport
  * @author  Etki <etki@etki.name>
  */
-class RequestGenerator implements RequestGeneratorInterface
+class Client implements ClientInterface
 {
     /**
      * API credentials.

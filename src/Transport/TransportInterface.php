@@ -16,10 +16,10 @@ interface TransportInterface
      * Sends request and receives response.
      *
      * @param string  $url     URL to query.
-     * @param Request $request Request to send.
+     * @param ApiRequest $request Request to send.
      *
-     * @return Response Response instance
+     * @return ApiResponse Response instance
      * @since 0.1.0
      */
-    public function sendRequest($url, Request $request);
+    public function sendRequest(HttpRequest $request);
 }

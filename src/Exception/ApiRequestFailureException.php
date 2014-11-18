@@ -14,4 +14,37 @@ use \RuntimeException;
  */
 class ApiRequestFailureException extends RuntimeException
 {
+    /**
+     * Exception origin (client / server).
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    protected $origin;
+
+    /**
+     * Initializer.
+     *
+     * @param string $message
+     * @param int    $origin
+     *
+     * @return self
+     * @since 0.1.0
+     */
+    public function __construct($message, $origin)
+    {
+        $this->origin = $origin;
+        parent::__construct($message);
+    }
+
+    /**
+     * Returns exception origin.
+     *
+     * @return string
+     * @since 0.1.0
+     */
+    public function getOrigin()
+    {
+        return $this->origin;
+    }
 }

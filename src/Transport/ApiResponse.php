@@ -10,7 +10,7 @@ namespace Etki\MvnoApiClient\Transport;
  * @package Etki\MvnoApiClient
  * @author  Etki <etki@etki.name>
  */
-class Response
+class ApiResponse
 {
     /**
      * Data holder.
@@ -42,5 +42,20 @@ class Response
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * Creates API response from HTTP response.
+     *
+     * @param HttpResponse $response Original HTTP response.
+     *
+     * @return ApiResponse Generated response.
+     * @since 0.1.0
+     */
+    public static function createFromHttpResponse(HttpResponse $response)
+    {
+        $apiResponse = new ApiResponse;
+        $apiResponse->setData(json_decode($response->getBody()));
+        return $apiResponse;
     }
 }

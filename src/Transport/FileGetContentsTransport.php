@@ -15,35 +15,27 @@ class FileGetContentsTransport implements TransportInterface
     /**
      * Sends single request.
      *
-     * @param string  $url     URL to query,
-     * @param Request $request Request to send.
+     * @param HttpRequest $request Request to send.
      *
      * @todo verify that no json_encode options are really needed.
      * @todo refactor if possible.
      *
-     * @return Response API response,
+     * @return ApiResponse API response,
      * @since 0.1.0
      */
-    public function sendRequest($url, Request $request)
+    public function sendRequest(HttpRequest $request)
     {
-        $credentials = $request->getCredentials();
-        $magicString = sprintf(
-            '%s:%s',
-            $credentials->getUsername(),
-            $credentials->getPassword()
-        );
-        $auth = base64_encode($magicString);
         $options = array(
             'http' => array(
                 'method' => 'POST',
-                'header' => 'Authorization: Basic ' . $auth,
-                'content' => json_encode($request->getData()),
+                'header' => $request->getHeaderString(),
+                'content' => json_encode($request->getPostBody()),
             ),
         );
         $context = stream_context_create($options);
-        $rawApiResponse = @file_get_contents($url, null, $context);
-        $response = new Response;
-        $response->setData(json_decode($rawApiResponse, true));
-        return $response;
+        $response = new HttpResponse;
+        $response->setBody(@file_get_contents($request->getUrl(), null, $context));
+        $apiResponse = ApiResponse::createFromHttpResponse($response);
+        return $apiResponse;
     }
 }

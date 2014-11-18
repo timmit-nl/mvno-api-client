@@ -2,10 +2,9 @@
 
 namespace Etki\MvnoApiClient;
 
-use Etki\MvnoApiClient\Exception\MissingApiMethodException;
-use Etki\MvnoApiClient\Transport\Request;
-use Etki\MvnoApiClient\Transport\RequestGenerator;
-use Etki\MvnoApiClient\Transport\RequestGeneratorInterface;
+use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
+use Etki\MvnoApiClient\Transport\ClientInterface;
+use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 
 /**
@@ -16,15 +15,15 @@ use Etki\MvnoApiClient\Transport\TransportInterface;
  * @package Etki\MvnoApiClient
  * @author  Etki <etki@etki.name>
  */
-class ApiClient
+class ApiClient implements ClientInterface
 {
     /**
-     * Request generator instance.
+     * Credentials required to perform API requests.
      *
-     * @type RequestGeneratorInterface
+     * @type Credentials
      * @since 0.1.0
      */
-    protected $requestGenerator;
+    protected $credentials;
     /**
      * HTTP transport.
      *
@@ -43,35 +42,31 @@ class ApiClient
     /**
      * Initializes client.
      *
-     * @param Credentials        $credentials Connection credentials.
-     * @param TransportInterface $transport   HTTP transport.
+     * @param Credentials $credentials Connection credentials.
      *
      * @return self
      * @since 0.1.0
      */
-    public function __construct(
-        Credentials $credentials = null,
-        TransportInterface $transport = null
-    ) {
-        $this->requestGenerator = new RequestGenerator;
-        if ($transport) {
-            $this->transport = $transport;
+    public function __construct(Credentials $credentials = null)
+    {
+        if ($credentials) {
+            $this->setCredentials($credentials);
         }
     }
 
     /**
-     * Sets request generator.
+     * Sets credentials.
      *
-     * @param RequestGeneratorInterface $requestGenerator New generator.
+     * @param Credentials $credentials API connection credentials.
      *
      * @return void
      * @since 0.1.0
      */
-    public function setRequestGenerator(
-        RequestGeneratorInterface $requestGenerator
-    ) {
-        $this->requestGenerator = $requestGenerator;
+    public function setCredentials(Credentials $credentials)
+    {
+        $this->credentials = $credentials;
     }
+
 
     /**
      * Sets transport.
@@ -97,17 +92,22 @@ class ApiClient
      */
     public function callMethod($name, array $data)
     {
-        if (!method_exists($this->requestGenerator, $name)) {
-            $message = sprintf('Method `%s` diesn\'t exist', $name);
-            throw new MissingApiMethodException($message);
+        $request = new ApiRequest;
+        $request->setData($data);
+        $request->setMethodName($name);
+        $request->setCredentials($this->credentials);
+        $httpRequest = $request->createHttpRequest();
+        $response = $this->transport->sendRequest($httpRequest);
+        $data = $response->getData();
+        if (isset($data['exception'])) {
+            $message = sprintf(
+                'API request has failed. Returned response: [exception: %s, ' .
+                    'origin: %s]',
+                $data['exception'],
+                $data['fault']
+            );
+            throw new ApiRequestFailureException($message, $data['fault']);
         }
-        /** @type Request $request */
-        $request = call_user_func_array(
-            array($this->requestGenerator, $name),
-            $data
-        );
-        $request->setHeader();
-        $response = $this->transport->sendRequest($this->apiUrl, $request);
-        return $response->getData();
+        return $response;
     }
 }
