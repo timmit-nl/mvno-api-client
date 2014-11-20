@@ -3,7 +3,10 @@
 namespace Etki\MvnoApiClient;
 
 use Etki\MvnoApiClient\Entity\Address;
+use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
+use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
+use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Transport\ClientInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\TransportInterface;
@@ -16,7 +19,7 @@ use Etki\MvnoApiClient\Transport\TransportInterface;
  * @package Etki\MvnoApiClient
  * @author  Etki <etki@etki.name>
  */
-class ApiClient implements ClientInterface
+class ApiClient implements LightweightApiClientInterface
 {
     /**
      * Credentials required to perform API requests.
@@ -88,7 +91,7 @@ class ApiClient implements ClientInterface
      * @param string $name Method name.
      * @param array  $data Method parameters.
      *
-     * @return array Response data.
+     * @return ApiResponse Response data.
      * @since 0.1.0
      */
     public function callMethod($name, array $data)
@@ -100,19 +103,28 @@ class ApiClient implements ClientInterface
         $request->setCredentials($this->credentials);
         $httpRequest = $request->createHttpRequest();
         $response = $this->transport->sendRequest($httpRequest);
-        $data = $response->getData();
+        $apiResponse = ApiResponse::createFromHttpResponse($response);
+        $data = $apiResponse->getData();
         if (isset($data['exception'])) {
             $message = sprintf(
-                'API request has failed. Returned response: [exception: %s, ' .
-                    'origin: %s]',
+                'API request has failed. Returned response: ' .
+                    '[exception: `%s`, origin: `%s`]',
                 $data['exception'],
                 $data['fault']
             );
             throw new ApiRequestFailureException($message, $data['fault']);
         }
-        return $response;
+        return $apiResponse;
     }
 
+    /**
+     * Adds new customer address.
+     *
+     * @param Address $address Address to add.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
     public function addAddress(Address $address)
     {
         $address->assertAllPropertiesSetExcept(array('id'));
@@ -133,5 +145,50 @@ class ApiClient implements ClientInterface
             'phone' => $address->getPhone(),
             'fax' => $address->getFax(),
         );
+        return $this->callMethod('addAddress', $data);
+    }
+
+    /**
+     * Creates customer,
+     *
+     * @param Customer $customer Customer structure.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function createCustomer(Customer $customer)
+    {
+        $customer->assertAllPropertiesSetExcept('id');
+        $data = array(
+            'email' => $customer->getEmail(),
+            'password' => $customer->getPassword(),
+            'title' => $customer->getTitle(),
+            'firstName' => $customer->getFirstName(),
+            'lastName' => $customer->getLastName(),
+            'language' => $customer->getLanguage(),
+            'identificationNumber' => $customer->getIdentificationNumber(),
+            'identificationType' => $customer->getIdentificationType(),
+            'nationality' => $customer->getNationality(),
+            'birthDate' => $customer->getBirthDate(),
+            'confirmed' => $customer->getConfirmed(),
+        );
+        return $this->callMethod('addCustomer', $data);
+    }
+    public function approveCustomer($customerId)
+    {
+        if ($customerId instanceof Customer) {
+            $customerId = $customerId->getId();
+        }
+        $data = array(
+            'customerId' => $customerId,
+            'approved' => true,
+        );
+        return $this->callMethod('setIdApproved', $data);
+    }
+
+    public function searchMsisdn(MsisdnSearchCriteria $criteria)
+    {
+        $data = $criteria->getProperties();
+        return $this->callMethod('searchMsisdn', $data);
     }
 }

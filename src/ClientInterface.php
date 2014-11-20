@@ -187,4 +187,28 @@ interface ClientInterface
      * @since 0.1.0
      */
     public function deleteSimCard($simCardId);
+
+    /**
+     * Recharges sim card balance.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param int    $amount      Amount of money to recharge with.
+     * @param int    $serviceCode Service code specifying
+     * @param null   $message     Custom message to attach. mau be overwritten
+     *                            by service.
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function recharge($msisdn, $amount, $serviceCode, $message = null);
+
+    /**
+     * Activates subscriptions. Should be run immediately after `addNewSim()`.
+     *
+     * @param string $msisdn
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function activateInitialSubscription($msisdn);
 }

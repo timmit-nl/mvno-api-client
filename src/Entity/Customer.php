@@ -2,15 +2,44 @@
 
 namespace Etki\MvnoApiClient\Entity;
 
+use Etki\MvnoApiClient\Entity;
+
+use InvalidArgumentException;
+
 /**
  * This entity represents single customer.
  *
+ * @method int getId()
+ * @method $this setId(int $id)
+ * @method string getEmail()
+ * @method $this setEmail(string $email)
+ * @method string getPassword()
+ * @method $this setPassword(string $password)
+ * @method int getHonorific()
+ * @method $this setHonorific(int $honorific)
+ * @method string getFirstName()
+ * @method $this setFirstName(string $firstName)
+ * @method string getLastName()
+ * @method $this setLastName(string $lastName)
+ * @method string getLanguage()
+ * @method $this setLanguage(string $language)
+ * @method string getIdentificationNumber()
+ * @method $this setIdentificationNumber(string $identificationNumber)
+ * @method int getIdentificationType()
+ * @method $this setIdentificationType(int $identificationType)
+ * @method string getNationality()
+ * @method $this setNationality(string $nationality)
+ * @method string getBirthDate()
+ * @method $this setBirthDate(string $birthDate)
+ * @method bool getConfirmed()
+ * @method $this setConfirmed(bool $confirmed)
+ *
  * @version 0.1.0
- * @since   
+ * @since   0.1.0
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class Customer
+class Customer extends Entity
 {
     /**
      * Constant for specifying empty title.
@@ -69,12 +98,12 @@ class Customer
      */
     protected $password;
     /**
-     * User title, %none%|mr|ms.
+     * User honorific (title), 0 = %none% | 1 = ms | 2 = ms.
      *
-     * @type string
+     * @type int
      * @since 0.1.0
      */
-    protected $title;
+    protected $honorific = 0;
     /**
      * Customer's first name.
      *
@@ -104,9 +133,9 @@ class Customer
      */
     protected $identificationNumber;
     /**
+     * Type of identification document, 0 - passport, 1 - ID card.
      *
-     *
-     * @type
+     * @type int
      * @since 0.1.0
      */
     protected $identificationType;
@@ -133,287 +162,62 @@ class Customer
     protected $confirmed;
 
     /**
-     * Returns user ID.
+     * Returns title (as integer).
      *
      * @return int
      * @since 0.1.0
      */
-    public function getId()
-    {
-        return $this->id;
-    }
-    /**
-     * Sets customer ID.
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-    /**
-     * Returns email.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
-     * Sets email.
-     *
-     * @param string $email
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-    }
-
-    /**
-     * Returns password.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Sets password.
-     *
-     * @param string $password
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
-    }
-
-    /**
-     * Returns title.
-     *
-     * @return string
-     * @since 0.1.0
-     */
     public function getTitle()
     {
-        return $this->title;
+        return $this->honorific;
     }
 
     /**
-     * Sets title.
+     * Sets honorific (title).
      *
-     * @param string $title
+     * @param string $title Honorific.
      *
-     * @return void
+     * @return $this Current instance.
      * @since 0.1.0
      */
     public function setTitle($title)
     {
-        $this->title = $title;
+        if (is_int($title)) {
+            $this->honorific = $title;
+        }
+        $title = strtolower($title);
+        switch ($title) {
+            case 'none':
+                $this->honorific = self::TITLE_NONE;
+                break;
+            case 'mr':
+                $this->honorific = self::TITLE_MR;
+                break;
+            case 'ms':
+                $this->honorific = self::TITLE_MS;
+                break;
+            default:
+                throw new \InvalidArgumentException('Unknown title');
+        }
+        return $this;
     }
 
     /**
-     * Returns firstName.
+     * Returns honorific in human-readable format.
      *
      * @return string
      * @since 0.1.0
      */
-    public function getFirstName()
+    public function getHonorificRepresentation()
     {
-        return $this->firstName;
-    }
-
-    /**
-     * Sets firstName.
-     *
-     * @param string $firstName
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setFirstName($firstName)
-    {
-        $this->firstName = $firstName;
-    }
-
-    /**
-     * Returns lastName.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * Sets lastName.
-     *
-     * @param string $lastName
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setLastName($lastName)
-    {
-        $this->lastName = $lastName;
-    }
-
-    /**
-     * Returns language.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getLanguage()
-    {
-        return $this->language;
-    }
-
-    /**
-     * Sets language.
-     *
-     * @param string $language
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setLanguage($language)
-    {
-        $this->language = $language;
-    }
-
-    /**
-     * Returns identification number.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getIdentificationNumber()
-    {
-        return $this->identificationNumber;
-    }
-
-    /**
-     * Sets identification number.
-     *
-     * @param string $identificationNumber
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setIdentificationNumber($identificationNumber)
-    {
-        $this->identificationNumber = $identificationNumber;
-    }
-
-    /**
-     * Returns identification type.
-     *
-     * @return mixed
-     * @since 0.1.0
-     */
-    public function getIdentificationType()
-    {
-        return $this->identificationType;
-    }
-
-    /**
-     * Sets identification type.
-     *
-     * @param mixed $identificationType
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setIdentificationType($identificationType)
-    {
-        $this->identificationType = $identificationType;
-    }
-
-    /**
-     * Returns nationality.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getNationality()
-    {
-        return $this->nationality;
-    }
-
-    /**
-     * Sets nationality.
-     *
-     * @param string $nationality
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setNationality($nationality)
-    {
-        $this->nationality = $nationality;
-    }
-
-    /**
-     * Returns birth date.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getBirthDate()
-    {
-        return $this->birthDate;
-    }
-
-    /**
-     * Sets birthDate.
-     *
-     * @param string $birthDate
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setBirthDate($birthDate)
-    {
-        $this->birthDate = $birthDate;
-    }
-
-    /**
-     * Returns confirmed.
-     *
-     * @return boolean
-     * @since 0.1.0
-     */
-    public function isConfirmed()
-    {
-        return $this->confirmed;
-    }
-
-    /**
-     * Sets confirmed.
-     *
-     * @param boolean $confirmed
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setConfirmed($confirmed)
-    {
-        $this->confirmed = $confirmed;
+        switch ($this->honorific) {
+            case self::TITLE_MS:
+                return 'ms';
+            case self::TITLE_MR:
+                return 'mr';
+            default:
+                return 'none';
+        }
     }
 
     /**

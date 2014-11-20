@@ -2,15 +2,28 @@
 
 namespace Etki\MvnoApiClient\Entity;
 
+use Etki\MvnoApiClient\Entity;
+
 /**
+ * This entity represents sim card.
  *
+ * @method int getCustomerId()
+ * @method $this setCustomerId(int $customerId)
+ * @method string getMsisdn()
+ * @method $this setMsisdn(string $msisdn)
+ * @method string getIccid()
+ * @method $this setIccid(string $iccid)
+ * @method string getPuk()
+ * @method $this setPuk(string $puk)
+ * @method bool getVerifyOnly()
+ * @method $this setVerifyOnly(bool $verifyOnly)
  *
  * @version 0.1.0
- * @since   
+ * @since   0.1.0
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class SimCard
+class SimCard extends Entity
 {
     /**
      * Customer ID.
@@ -47,125 +60,4 @@ class SimCard
      * @since 0.1.0
      */
     protected $verifyOnly;
-
-    /**
-     * Returns customerId.
-     *
-     * @return int
-     * @since 0.1.0
-     */
-    public function getCustomerId()
-    {
-        return $this->customerId;
-    }
-
-    /**
-     * Sets customerId.
-     *
-     * @param int $customerId
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setCustomerId($customerId)
-    {
-        $this->customerId = $customerId;
-    }
-
-    /**
-     * Returns msisdn.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getMsisdn()
-    {
-        return $this->msisdn;
-    }
-
-    /**
-     * Sets msisdn.
-     *
-     * @param string $msisdn
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setMsisdn($msisdn)
-    {
-        $this->msisdn = $msisdn;
-    }
-
-    /**
-     * Returns iccid.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getIccid()
-    {
-        return $this->iccid;
-    }
-
-    /**
-     * Sets iccid.
-     *
-     * @param string $iccid
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setIccid($iccid)
-    {
-        $this->iccid = $iccid;
-    }
-
-    /**
-     * Returns puk.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getPuk()
-    {
-        return $this->puk;
-    }
-
-    /**
-     * Sets puk.
-     *
-     * @param string $puk
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setPuk($puk)
-    {
-        $this->puk = $puk;
-    }
-
-    /**
-     * Returns verifyOnly.
-     *
-     * @return boolean
-     * @since 0.1.0
-     */
-    public function isVerifyOnly()
-    {
-        return $this->verifyOnly;
-    }
-
-    /**
-     * Sets verifyOnly.
-     *
-     * @param boolean $verifyOnly
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setVerifyOnly($verifyOnly)
-    {
-        $this->verifyOnly = $verifyOnly;
-    }
-
 }
