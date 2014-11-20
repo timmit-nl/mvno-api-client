@@ -1,23 +1,22 @@
 <?php
 
-namespace Etki\MvnoApiClient;
+namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\Address;
+use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Entity\Customer;
 
 /**
- * Lightweight interface for realizing current tasks. Should be removed from
- * repository in near future.
+ * This interface describes low-level API.
  *
  * @version 0.1.0
  * @since   0.1.0
- * @package Etki\MvnoApiClient
+ * @package Etki\MvnoApiClient\Client
  * @author  Etki <etki@etki.name>
  */
-interface LightweightApiClientInterface
+interface LowLevelClientInterface
 {
     /**
      * Creates new customer.
@@ -42,12 +41,13 @@ interface LightweightApiClientInterface
     /**
      * Approves customer by his ID.
      *
-     * @param int $id Customer ID.
+     * @param int  $customerId Customer ID.
+     * @param bool $status     New customer status.
      *
      * @return ApiResponse Data.
      * @since 0.1.0
      */
-    public function approveCustomer($id);
+    public function setIdApproved($customerId, $status);
 
     /**
      * Searches MSISDNs.
@@ -78,4 +78,17 @@ interface LightweightApiClientInterface
      * @since 0.1.0
      */
     public function activateInitialSubscription($msisdn);
+    /**
+     * Recharges sim card balance.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param int    $amount      Amount of money to recharge with.
+     * @param int    $serviceCode Service code specifying
+     * @param null   $message     Custom message to attach. mau be overwritten
+     *                            by service.
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function recharge($msisdn, $amount, $serviceCode, $message = null);
 }

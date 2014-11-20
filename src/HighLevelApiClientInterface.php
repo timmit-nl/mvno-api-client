@@ -6,6 +6,7 @@ use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\CustomerSearchParameter;
 use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 
 /**
  * This interface describes MVNO API.
@@ -15,7 +16,7 @@ use Etki\MvnoApiClient\Entity\SimCard;
  * @package Uprock\MvnoApi
  * @author  Etki <etki@etki.name>
  */
-interface ClientInterface
+interface HighLevelApiClientInterface
 {
     /**
      * Creates new customer.
@@ -35,7 +36,7 @@ interface ClientInterface
      * @return ApiResponse Data.
      * @since 0.1.0
      */
-    public function modifyCustomer(Customer $customer);
+    //public function modifyCustomer(Customer $customer);
 
     /**
      * Deletes customer.
@@ -46,7 +47,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function deleteCustomer($id, $detachSims = true);
+    //public function deleteCustomer($id, $detachSims = true);
 
     /**
      * Adds new address,
@@ -66,7 +67,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function modifyAddress(Address $address);
+    //public function modifyAddress(Address $address);
 
     /**
      * Delete address
@@ -76,7 +77,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function deleteAddress($id);
+    //public function deleteAddress($id);
 
     /**
      *
@@ -104,7 +105,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function getCustomer(CustomerSearchParameter $parameter);
+    //public function getCustomer(CustomerSearchParameter $parameter);
 
     /**
      * Returns customers.
@@ -115,27 +116,27 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function getCustomers($query);
+    //public function getCustomers($query);
 
     /**
      * Approve customer by his ID.
      *
-     * @param int|Customer $id Customer ID or customer instance.
+     * @param int|Customer $customerId Customer ID or customer instance.
      *
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function approveCustomer($id);
+    public function approveCustomer($customerId);
 
     /**
      * Revoke customer approval.
      *
-     * @param int|Customer $id Customer ID or customer instance.
+     * @param int|Customer $customerId Customer ID or customer instance.
      *
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function disapproveCustomer($id);
+    public function disapproveCustomer($customerId);
 
     /**
      * Block sim card.
@@ -145,7 +146,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function blockSimCard($msisdn);
+    //public function blockSimCard($msisdn);
 
     /**
      * Unblock sim card
@@ -155,7 +156,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function unblockSimCard($msisdn);
+    //public function unblockSimCard($msisdn);
 
     /**
      * Sets sim card language,
@@ -165,7 +166,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function setSimCardLanguage($language);
+    //public function setSimCardLanguage($language);
 
     /**
      * Modify sim card using provided data.
@@ -175,7 +176,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function modifySimCard(SimCard $simCard);
+    //public function modifySimCard(SimCard $simCard);
 
     /**
      * Deletes sim card by it's ID.
@@ -186,7 +187,7 @@ interface ClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function deleteSimCard($simCardId);
+    //public function deleteSimCard($simCardId);
 
     /**
      * Recharges sim card balance.
@@ -211,4 +212,14 @@ interface ClientInterface
      * @since 0.1.0
      */
     public function activateInitialSubscription($msisdn);
+
+    /**
+     * Searches MSISDN by provided criteria.
+     *
+     * @param MsisdnSearchCriteria $criteria
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function searchMsisdn(MsisdnSearchCriteria $criteria);
 }

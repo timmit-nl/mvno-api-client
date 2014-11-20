@@ -7,9 +7,10 @@ use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Transport\ClientInterface;
+use Etki\MvnoApiClient\Transport\HighLevelApiClientInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\TransportInterface;
+use Etki\MvnoApiClient\Client\LowLevelApiClient;
 
 /**
  * The very very client.
@@ -19,8 +20,15 @@ use Etki\MvnoApiClient\Transport\TransportInterface;
  * @package Etki\MvnoApiClient
  * @author  Etki <etki@etki.name>
  */
-class ApiClient implements LightweightApiClientInterface
+class HighLevelApiClient implements HighLevelApiClientInterface
 {
+    /**
+     * Low-level API handle.
+     *
+     * @type LowLevelApiClient
+     * @since 0.1.0
+     */
+    protected $lowLevelApi;
     /**
      * Credentials required to perform API requests.
      *
