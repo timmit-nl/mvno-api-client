@@ -2,16 +2,56 @@
 
 namespace Etki\MvnoApiClient\Entity;
 
+use Etki\MvnoApiClient\Entity;
+
 /**
  * Address entity.
+ *
+ * @method $this setId(int $id)
+ * @method int getId()
+ * @method $this setCustomerId(int $customerId)
+ * @method int getCustomerId()
+ * @method $this setEmail(string $email)
+ * @method string getEmail()
+ * @method $this setFirstName(string $firstName)
+ * @method string getFirstName()
+ * @method $this setLastName(string $lastName)
+ * @method string getLastName()
+ * @method $this setCompany(string $company)
+ * @method string getCompany()
+ * @method $this setStreet(string $street)
+ * @method string getStreet()
+ * @method $this setPostOfficeBox(string $postOfficeBox)
+ * @method string getPostOfficeBox()
+ * @method $this setPostCode(string $postCode)
+ * @method string getPostCode()
+ * @method $this setCity(string $city)
+ * @method string getCity()
+ * @method $this setState(string $state)
+ * @method string getState()
+ * @method $this setAdditionalInformation(string $additionalInformation)
+ * @method string getAdditionalInformation()
+ * @method $this setCountryCode(string $countryCode)
+ * @method string getCountryCode()
+ * @method $this setPhone(string $phone)
+ * @method string getPhone()
+ * @method $this setFax(string $fax)
+ * @method string getFax()
  *
  * @version 0.1.0
  * @since   0.1.0
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class Address
+class Address extends Entity
 {
+    /**
+     * Address record identifier.
+     *
+     * @type int
+     * @since 0.1.0
+     */
+    protected $id;
     /**
      * ID of the related customer
      *
@@ -19,6 +59,20 @@ class Address
      * @since 0.1.0
      */
     protected $customerId;
+    /**
+     * Person's email.
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    protected $email;
+    /**
+     * Person's honorific. 0 for none, 1 for 'ms' and 2 for 'mr'.
+     *
+     * @type int
+     * @since 0.1.0
+     */
+    protected $honorific = 0;
     /**
      * Customer's first name.
      *
@@ -53,7 +107,7 @@ class Address
      * @type string
      * @since 0.1.0
      */
-    protected $poBox;
+    protected $postOfficeBox;
     /**
      * Postal code.
      *
@@ -81,14 +135,14 @@ class Address
      * @type string
      * @since 0.1.0
      */
-    protected $additional;
+    protected $additionalInformation;
     /**
      * Country.
      *
      * @type string
      * @since 0.1.0
      */
-    protected $country;
+    protected $countryCode;
     /**
      * Phone,
      *
@@ -105,314 +159,120 @@ class Address
     protected $fax;
 
     /**
-     * Returns customerId.
+     * Sets title.
      *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getCustomerId()
-    {
-        return $this->customerId;
-    }
-
-    /**
-     * Sets customerId.
-     *
-     * @param string $customerId
+     * @param string $title Title (honorific) to set.
      *
      * @return void
      * @since 0.1.0
      */
-    public function setCustomerId($customerId)
+    public function setTitle($title)
     {
-        $this->customerId = $customerId;
+        $this->honorific = $title;
     }
 
     /**
-     * Returns firstName.
+     * Returns title (honorific).
      *
-     * @return string
+     * @return int
      * @since 0.1.0
      */
-    public function getFirstName()
+    public function getTitle()
     {
-        return $this->firstName;
+        return $this->honorific;
     }
 
     /**
-     * Sets firstName.
+     * Converts honorific (title) to it's string representation.
      *
-     * @param string $firstName
-     *
-     * @return void
+     * @return string Returns honorific representation.
      * @since 0.1.0
      */
-    public function setFirstName($firstName)
+    public function getHonorificRepresentation()
     {
-        $this->firstName = $firstName;
+        switch ($this->honorific) {
+            case 1:
+                return 'Ms';
+            case 2:
+                return 'Mr';
+            default:
+                return 'None';
+        }
     }
 
     /**
-     * Returns lastName.
+     * Sets country code.
      *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * Sets lastName.
+     * @param string $country Two-letter country code.
      *
-     * @param string $lastName
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setLastName($lastName)
-    {
-        $this->lastName = $lastName;
-    }
-
-    /**
-     * Returns company.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getCompany()
-    {
-        return $this->company;
-    }
-
-    /**
-     * Sets company.
-     *
-     * @param string $company
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setCompany($company)
-    {
-        $this->company = $company;
-    }
-
-    /**
-     * Returns street.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getStreet()
-    {
-        return $this->street;
-    }
-
-    /**
-     * Sets street.
-     *
-     * @param string $street
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setStreet($street)
-    {
-        $this->street = $street;
-    }
-
-    /**
-     * Returns poBox.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getPoBox()
-    {
-        return $this->poBox;
-    }
-
-    /**
-     * Sets poBox.
-     *
-     * @param string $poBox
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setPoBox($poBox)
-    {
-        $this->poBox = $poBox;
-    }
-
-    /**
-     * Returns postCode.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getPostCode()
-    {
-        return $this->postCode;
-    }
-
-    /**
-     * Sets postCode.
-     *
-     * @param string $postCode
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setPostCode($postCode)
-    {
-        $this->postCode = $postCode;
-    }
-
-    /**
-     * Returns city.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getCity()
-    {
-        return $this->city;
-    }
-
-    /**
-     * Sets city.
-     *
-     * @param string $city
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setCity($city)
-    {
-        $this->city = $city;
-    }
-
-    /**
-     * Returns state.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getState()
-    {
-        return $this->state;
-    }
-
-    /**
-     * Sets state.
-     *
-     * @param string $state
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setState($state)
-    {
-        $this->state = $state;
-    }
-
-    /**
-     * Returns additional.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getAdditional()
-    {
-        return $this->additional;
-    }
-
-    /**
-     * Sets additional.
-     *
-     * @param string $additional
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setAdditional($additional)
-    {
-        $this->additional = $additional;
-    }
-
-    /**
-     * Returns country.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getCountry()
-    {
-        return $this->country;
-    }
-
-    /**
-     * Sets country.
-     *
-     * @param string $country
-     *
-     * @return void
+     * @return $this Current instance.
      * @since 0.1.0
      */
     public function setCountry($country)
     {
-        $this->country = $country;
+        $this->countryCode = $country;
+        return $this;
     }
 
     /**
-     * Returns phone.
+     * Returns country code, duplicates self::getCountryCode().
      *
-     * @return string
+     * @return string Two-letter country code.
      * @since 0.1.0
      */
-    public function getPhone()
+    public function getCountry()
     {
-        return $this->phone;
+        return $this->countryCode;
     }
 
     /**
-     * Sets phone.
+     * Sets post office box, duplicates self::setPostOfficeBox().
      *
-     * @param string $phone
+     * @param string $poBox Post office box.
      *
-     * @return void
+     * @return $this Current instance.
      * @since 0.1.0
      */
-    public function setPhone($phone)
+    public function setPoBox($poBox)
     {
-        $this->phone = $phone;
+        $this->postOfficeBox = $poBox;
+        return $this;
     }
 
     /**
-     * Returns fax.
+     * Returns post office box, duplicates self::getPostOfficeBox().
      *
-     * @return string
+     * @return string Post office box.
      * @since 0.1.0
      */
-    public function getFax()
+    public function getPoBox()
     {
-        return $this->fax;
+        return $this->postOfficeBox;
     }
 
     /**
-     * Sets fax.
+     * Sets additional information, duplicates self::setAdditionalInformation().
      *
-     * @param string $fax
+     * @param string $additional Additional information.
      *
-     * @return void
+     * @return $this Current instance.
      * @since 0.1.0
      */
-    public function setFax($fax)
+    public function setAdditional($additional)
     {
-        $this->fax = $fax;
+        $this->additionalInformation = $additional;
+        return $this;
+    }
+
+    /**
+     * Returns additional information, duplicates
+     * self::getAdditionalInformation()
+     *
+     * @return string Additional information.
+     * @since 0.1.0
+     */
+    public function getAdditional()
+    {
+        return $this->additionalInformation;
     }
 }

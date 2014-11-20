@@ -2,6 +2,7 @@
 
 namespace Etki\MvnoApiClient;
 
+use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
 use Etki\MvnoApiClient\Transport\ClientInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
@@ -93,6 +94,7 @@ class ApiClient implements ClientInterface
     public function callMethod($name, array $data)
     {
         $request = new ApiRequest;
+        $data['apiKey'] = $this->credentials->getApiKey();
         $request->setData($data);
         $request->setMethodName($name);
         $request->setCredentials($this->credentials);
@@ -109,5 +111,27 @@ class ApiClient implements ClientInterface
             throw new ApiRequestFailureException($message, $data['fault']);
         }
         return $response;
+    }
+
+    public function addAddress(Address $address)
+    {
+        $address->assertAllPropertiesSetExcept(array('id'));
+        $data = array(
+            'customerId' => $address->getCustomerId(),
+            'email' => $address->getEmail(),
+            'title' => $address->getTitle(),
+            'firstName' => $address->getFirstName(),
+            'lastName' => $address->getLastName(),
+            'company' => $address->getCompany(),
+            'street' => $address->getStreet(),
+            'poBox' => $address->getPostOfficeBox(),
+            'postCode' => $address->getPostCode(),
+            'city' => $address->getCity(),
+            'state' => $address->getState(),
+            'additional' => $address->getAdditionalInformation(),
+            'country' => $address->getCountryCode(),
+            'phone' => $address->getPhone(),
+            'fax' => $address->getFax(),
+        );
     }
 }
