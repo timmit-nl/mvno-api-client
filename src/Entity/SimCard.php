@@ -1,6 +1,7 @@
 <?php
 
 namespace Etki\MvnoApiClient\Entity;
+
 /**
  * This entity represents sim card.
  *
