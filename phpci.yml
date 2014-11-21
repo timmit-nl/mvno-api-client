@@ -16,6 +16,7 @@ test:
     config: codeception.yml
   php_loc:
     directory: src
+    allow_failures: true
   php_mess_detector:
     rules:
       - codesize
@@ -24,8 +25,10 @@ test:
       - controversial
       - design
     path: src
+    allow_failures: true
   php_code_sniffer:
     path: src
     encoding: utf-8
     tab_width: 4
     standard: "PSR1,PSR2"
+    allow_failures: true
