@@ -188,4 +188,41 @@ class LowLevelApiClient extends AbstractApiClient implements
         );
         return $this->callMethod('recharge', $data);
     }
+
+    /**
+     * Retrieves rates for calling from one country to another.
+     *
+     * @param string $fromCountry 3-letter country code.
+     * @param string $toCountry   3-letter country code.
+     *
+     * @return ApiResponse API response.
+     * @since 0,1,0
+     */
+    public function getRate($fromCountry, $toCountry) {}
+    /**
+     * Get roaming rates.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param string $msrn        Roaming zone (set as MSISDN, country code
+     *                            prefix is required).
+     * @param string $destination Destination number (set as MSISDN, country
+     *                            code prefix is required).
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function getRoamingRate($msisdn, $msrn, $destination) {}
+    /**
+     * {@inheritdoc}
+     *
+     * @param string[] $includedFeatures Features that sim card should have.
+     * @param string[] $excludedFeatures Features that sim card must not have.
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function dispatchCard(
+        array $includedFeatures,
+        array $excludedFeatures
+    ) {}
 }
