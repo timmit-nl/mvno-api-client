@@ -7,6 +7,7 @@ use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
+use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 
 /**
  * This interface describes low-level API.
@@ -16,7 +17,7 @@ use Etki\MvnoApiClient\Transport\ApiResponse;
  * @package Etki\MvnoApiClient\Client
  * @author  Etki <etki@etki.name>
  */
-interface LowLevelClientInterface
+interface LowLevelApiClientInterface
 {
     /**
      * Creates new customer.
@@ -43,6 +44,9 @@ interface LowLevelClientInterface
      *
      * @param int  $customerId Customer ID.
      * @param bool $status     New customer status.
+     *
+     * @throws ApiOperationFailureException Thrown in case operation hasn't
+     * finished correctly.
      *
      * @return ApiResponse Data.
      * @since 0.1.0

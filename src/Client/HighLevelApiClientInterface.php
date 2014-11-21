@@ -1,12 +1,14 @@
 <?php
 
-namespace Etki\MvnoApiClient\Transport;
+namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\CustomerSearchParameter;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
+use Etki\MvnoApiClient\Transport\ApiResponse;
+use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 
 /**
  * This interface describes MVNO API.
@@ -22,11 +24,12 @@ interface HighLevelApiClientInterface
      * Creates new customer.
      *
      * @param Customer $customer Customer instance.
+     * @param Address  $address Customer address.
      *
      * @return ApiResponse Data.
      * @since 0.1.0
      */
-    public function createCustomer(Customer $customer);
+    public function createCustomer(Customer $customer, Address $address);
 
     /**
      * Modifies customer with new data.
@@ -80,22 +83,26 @@ interface HighLevelApiClientInterface
     //public function deleteAddress($id);
 
     /**
+     * Assigns new sim card to customer.
      *
+     * @param SimCard $simCard Sim card entity instance.
      *
-     * @param int|Customer $customerId Customer ID or full customer entity
-     *                                 instance.
-     * @param SimCard      $simCard    Sim card entity instance.
-     * @param bool         $autoRetry  Automatically retry using new numbers
-     *                                 until card is registered.
+     * @throws ApiOperationFailureException
      *
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function assignNewSim(
-        $customerId,
-        SimCard $simCard,
-        $autoRetry = true
-    );
+    public function addCustomerSim(SimCard $simCard);
+
+    /**
+     * Automatically assigns new sim card to customer.
+     *
+     * @param SimCard $simCard
+     *
+     * @return string New sim card MSISDN.
+     * @since 0.1.0
+     */
+    public function autoAssignNewSim(SimCard $simCard);
 
     /**
      * Returns customer.
@@ -214,12 +221,12 @@ interface HighLevelApiClientInterface
     public function activateInitialSubscription($msisdn);
 
     /**
-     * Searches MSISDN by provided criteria.
+     * Retrieves new msisdn.
      *
-     * @param MsisdnSearchCriteria $criteria
+     * @param MsisdnSearchCriteria $criteria Search criteria.
      *
-     * @return ApiResponse API response.
+     * @return string.
      * @since 0.1.0
      */
-    public function searchMsisdn(MsisdnSearchCriteria $criteria);
+    public function getNewMsisdn(MsisdnSearchCriteria $criteria = null);
 }

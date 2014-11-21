@@ -2,7 +2,8 @@
 
 namespace Etki\MvnoApiClient\Exception;
 
-use \RuntimeException;
+use RuntimeException;
+use Exception;
 
 /**
  * This exception is thrown whenever API request fails.
@@ -12,7 +13,7 @@ use \RuntimeException;
  * @package Etki\MvnoApiClient\Exception
  * @author  Etki <etki@etki.name>
  */
-class ApiRequestFailureException extends RuntimeException
+class ApiRequestFailureException extends ApiFailureException
 {
     /**
      * Exception origin (client / server).
@@ -23,18 +24,39 @@ class ApiRequestFailureException extends RuntimeException
     protected $origin;
 
     /**
+     * Constant for setting client origin.
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    const ORIGIN_CLIENT = 'client';
+    /**
+     * Constant for setting server origin.
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    const ORIGIN_SERVER = 'server';
+
+    /**
      * Initializer.
      *
-     * @param string $message
-     * @param int    $origin
+     * @param string    $message  Exception message.
+     * @param string    $origin   Exception origin (client/server)
+     * @param int       $code     Exception code.
+     * @param Exception $previous Previous exception in stack.
      *
      * @return self
      * @since 0.1.0
      */
-    public function __construct($message, $origin)
-    {
+    public function __construct(
+        $message,
+        $origin,
+        $code = 0,
+        Exception $previous = null
+    ) {
         $this->origin = $origin;
-        parent::__construct($message);
+        parent::__construct($message, $code, $previous);
     }
 
     /**

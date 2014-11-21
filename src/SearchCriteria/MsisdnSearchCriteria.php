@@ -5,6 +5,19 @@ namespace Etki\MvnoApiClient\SearchCriteria;
 /**
  * Search criteria for MSISDN records.
  *
+ * @method $this setFilter(string $filter)
+ * @method string getFilter()
+ * @method $this setRangeFrom(string $rangeFrom)
+ * @method string getRangeFrom()
+ * @method $this setRangeTo(string $rangeTo)
+ * @method string getRangeTo()
+ * @method $this setUnassigned(bool $unassigned)
+ * @method bool getUnassigned()
+ * @method $this setRandomSet(bool $randomSet)
+ * @method bool getRandomSet()
+ * @method $this setCountryCode(string $countryCode)
+ * @method string getCountryCode()
+ *
  * @version 0.1.0
  * @since   0.1.0
  * @package Etki\MvnoApiClient\SearchCriteria

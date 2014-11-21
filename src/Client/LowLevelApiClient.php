@@ -3,9 +3,15 @@
 namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Credentials;
+use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
+use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
+use Etki\MvnoApiClient\Entity\Address;
+use Etki\MvnoApiClient\Entity\Customer;
+use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 
 /**
  * This is low-level API that directly implements methods specified by API.
@@ -15,81 +21,172 @@ use Etki\MvnoApiClient\Transport\ApiResponse;
  * @package Etki\MvnoApiClient\Client
  * @author  Etki <etki@etki.name>
  */
-class LowLevelApiClient implements LowLevelClientInterface
+class LowLevelApiClient extends AbstractApiClient implements
+    LowLevelApiClientInterface
 {
-    protected $apiUrl;
-    protected $credentials;
     /**
-     * Initializes client.
+     * Creates customer,
      *
-     * @param Credentials $credentials Connection credentials.
+     * @param Customer $customer Customer structure.
      *
-     * @return self
+     * @return ApiResponse Response.
      * @since 0.1.0
      */
-    public function __construct(Credentials $credentials = null)
+    public function createCustomer(Customer $customer)
     {
-        if ($credentials) {
-            $this->setCredentials($credentials);
+        $customer->assertAllPropertiesSetExcept('id');
+        $data = array(
+            'email' => $customer->getEmail(),
+            'password' => $customer->getPassword(),
+            'title' => $customer->getTitle(),
+            'firstName' => $customer->getFirstName(),
+            'lastName' => $customer->getLastName(),
+            'language' => $customer->getLanguage(),
+            'identificationNumber' => $customer->getIdentificationNumber(),
+            'identificationType' => $customer->getIdentificationType(),
+            'nationality' => $customer->getNationality(),
+            'birthDate' => $customer->getBirthDate(),
+            'confirmed' => $customer->getConfirmed(),
+        );
+        return $this->callMethod('addCustomer', $data);
+    }
+
+    /**
+     * Sets customer approve status.
+     *
+     * @param int|Customer  $customerId Customer ID.
+     * @param bool          $status     Approve status (true/false).
+     *
+     * @throws ApiOperationFailureException Thrown in case API hasn't report
+     *                                      successful operation.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function setIdApproved($customerId, $status)
+    {
+        if ($customerId instanceof Customer) {
+            $customerId = $customerId->getId();
         }
-    }
-
-    /**
-     * Sets credentials.
-     *
-     * @param Credentials $credentials API connection credentials.
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setCredentials(Credentials $credentials)
-    {
-        $this->credentials = $credentials;
-    }
-
-
-    /**
-     * Sets transport.
-     *
-     * @param TransportInterface $transport New transport.
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setTransport(TransportInterface $transport)
-    {
-        $this->transport = $transport;
-    }
-
-    /**
-     * Calls method by it's name.
-     *
-     * @param string $name Method name.
-     * @param array  $data Method parameters.
-     *
-     * @return ApiResponse Response data.
-     * @since 0.1.0
-     */
-    public function callMethod($name, array $data)
-    {
-        $request = new ApiRequest;
-        $data['apiKey'] = $this->credentials->getApiKey();
-        $request->setData($data);
-        $request->setMethodName($name);
-        $request->setCredentials($this->credentials);
-        $httpRequest = $request->createHttpRequest();
-        $response = $this->transport->sendRequest($httpRequest);
-        $apiResponse = ApiResponse::createFromHttpResponse($response);
-        $data = $apiResponse->getData();
-        if (isset($data['exception'])) {
-            $message = sprintf(
-                'API request has failed. Returned response: ' .
-                '[exception: `%s`, origin: `%s`]',
-                $data['exception'],
-                $data['fault']
-            );
-            throw new ApiRequestFailureException($message, $data['fault']);
+        $data = array(
+            'customerId' => $customerId,
+            'approved' => $status,
+        );
+        $response = $this->callMethod('setIdApproved', $data);
+        $data = $response->getData();
+        if (!$data['responseStatus']) {
+            throw new ApiOperationFailureException;
         }
-        return $apiResponse;
+        return $response;
+    }
+
+    /**
+     * Activates initial customer subscription.
+     *
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return ApiResponse Response
+     * @since 0.1.0
+     */
+    public function activateInitialSubscription($msisdn)
+    {
+        $data = array('msisdn' => $msisdn,);
+        return $this->callMethod('activateInitialSubscription', $data);
+    }
+
+    /**
+     * Adds new customer address.
+     *
+     * @param Address $address Address to add.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function addAddress(Address $address)
+    {
+        $excludedProperties = array('id',);
+        $address->assertAllPropertiesSetExcept($excludedProperties);
+        $data = array(
+            'customerId' => $address->getCustomerId(),
+            'email' => $address->getEmail(),
+            'title' => $address->getTitle(),
+            'firstName' => $address->getFirstName(),
+            'lastName' => $address->getLastName(),
+            'company' => $address->getCompany(),
+            'street' => $address->getStreet(),
+            'poBox' => $address->getPostOfficeBox(),
+            'postCode' => $address->getPostCode(),
+            'city' => $address->getCity(),
+            'state' => $address->getState(),
+            'additional' => $address->getAdditionalInformation(),
+            'country' => $address->getCountryCode(),
+            'phone' => $address->getPhone(),
+            'fax' => $address->getFax(),
+        );
+        return $this->callMethod('addAddress', $data);
+    }
+
+    /**
+     * Performs MSISDN search according to criteria.
+     *
+     * @param MsisdnSearchCriteria $criteria Criteria that describes what to
+     *                                       search.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function searchMsisdn(MsisdnSearchCriteria $criteria)
+    {
+        $data = $criteria->getProperties();
+        return $this->callMethod('searchMsisdn', $data);
+    }
+
+    /**
+     * Assigns new sim card to customer.
+     *
+     * @param SimCard $simCard Sim card definition.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function assignNewSim(SimCard $simCard)
+    {
+        $simCard->assertAllPropertiesSet();
+        $data = array(
+            'customerId' => $simCard->getCustomerId(),
+            'msisdn' => $simCard->getMsisdn(),
+            'iccid' => $simCard->getIccid(),
+            'puk' => $simCard->getPuk(),
+            'verifyOnly' => $simCard->getVerifyOnly(),
+        );
+        return $this->callMethod('assignNewSim', $data);
+    }
+
+    /**
+     * Recharges sim card balance.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param int    $amount      Amount of money, in 10000th of measure unit
+     *                            (ex.: 0.01 euro = 100, 1 = 0.0001 euro)
+     * @param int    $serviceCode Service code specifying the source and purpose
+     *                            of the message.
+     * @param string $message     Optional message.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function recharge(
+        $msisdn,
+        $amount,
+        $serviceCode,
+        $message = null
+    ) {
+        $data = array(
+            'msisdn' => $msisdn,
+            'amount' => $amount,
+            'serviceCode' => $serviceCode,
+            'message' => $message,
+        );
+        return $this->callMethod('recharge', $data);
     }
 }

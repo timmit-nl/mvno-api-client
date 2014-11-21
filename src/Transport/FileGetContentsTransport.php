@@ -13,6 +13,20 @@ namespace Etki\MvnoApiClient\Transport;
 class FileGetContentsTransport implements TransportInterface
 {
     /**
+     * Number of retries.
+     *
+     * @type int
+     * @since 0.1.0
+     */
+    protected $retries = 5;
+    /**
+     * Timeout in seconds.
+     *
+     * @type int
+     * @since 0.1.0
+     */
+    protected $timeout = 5;
+    /**
      * Sends single request.
      *
      * @param HttpRequest $request Request to send.
@@ -30,11 +44,66 @@ class FileGetContentsTransport implements TransportInterface
                 'method' => 'POST',
                 'header' => $request->getHeaderString(),
                 'content' => json_encode($request->getPostBody()),
+                'timeout' => $this->timeout,
             ),
         );
         $context = stream_context_create($options);
         $response = new HttpResponse;
-        $response->setBody(@file_get_contents($request->getUrl(), null, $context));
+        for ($i = 0; $i < $this->retries; $i++) {
+            $raw = @file_get_contents($request->getUrl(), null, $context);
+            if ($raw) {
+                break;
+            }
+        }
+        $response->setBody($raw);
         return $response;
+    }
+
+    /**
+     * Sets amount of retries.
+     *
+     * @param int $retries
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setRetries($retries)
+    {
+        $this->retries = max(1, $retries);
+    }
+
+    /**
+     * Returns amount of retries.
+     *
+     * @return int
+     * @since 0.1.0
+     */
+    public function getRetries()
+    {
+        return $this->retries;
+    }
+
+    /**
+     * Sets timeout.
+     *
+     * @param int|float $timeout Request timeout.
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = max(0.1, $timeout);
+    }
+
+    /**
+     * Returns current timeout.
+     *
+     * @return int|float
+     * @since 0.1.0
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
     }
 }

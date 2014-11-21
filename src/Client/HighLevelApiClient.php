@@ -4,13 +4,18 @@ namespace Etki\MvnoApiClient;
 
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
+use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Transport\HighLevelApiClientInterface;
+use Etki\MvnoApiClient\Transport\FileGetContentsTransport;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\TransportInterface;
+use Etki\MvnoApiClient\Client\LowLevelApiClientInterface;
 use Etki\MvnoApiClient\Client\LowLevelApiClient;
+use Etki\MvnoApiClient\Client\HighLevelApiClientInterface;
+use BadMethodCallException;
 
 /**
  * The very very client.
@@ -25,108 +30,177 @@ class HighLevelApiClient implements HighLevelApiClientInterface
     /**
      * Low-level API handle.
      *
-     * @type LowLevelApiClient
+     * @type LowLevelApiClientInterface
      * @since 0.1.0
      */
     protected $lowLevelApi;
-    /**
-     * Credentials required to perform API requests.
-     *
-     * @type Credentials
-     * @since 0.1.0
-     */
-    protected $credentials;
-    /**
-     * HTTP transport.
-     *
-     * @type TransportInterface
-     * @since 0.1.0
-     */
-    protected $transport;
-    /**
-     * URL which will be used to query the API.
-     *
-     * @type string
-     * @since 0.1.0
-     */
-    protected $apiUrl = 'https://api.nakasolutions.com/mvno/json';
 
     /**
      * Initializes client.
      *
+     * @param string      $apiUrl      API url.
      * @param Credentials $credentials Connection credentials.
      *
      * @return self
      * @since 0.1.0
      */
-    public function __construct(Credentials $credentials = null)
+    public function __construct($apiUrl, Credentials $credentials)
     {
-        if ($credentials) {
-            $this->setCredentials($credentials);
-        }
+        $this->lowLevelApi = new LowLevelApiClient;
+        $this->lowLevelApi->setCredentials($credentials);
+        $this->lowLevelApi->setApiUrl($apiUrl);
+        $this->lowLevelApi->setTransport(new FileGetContentsTransport);
     }
 
     /**
-     * Sets credentials.
+     * Saves customer as approved.
      *
-     * @param Credentials $credentials API connection credentials.
+     * @param Customer|int $customerId Customer ID or just customer instance.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function approveCustomer($customerId)
+    {
+        return $this->lowLevelApi->setIdApproved($customerId, true);
+    }
+
+    /**
+     * Saves customer as customer without approved status.
+     *
+     * @param Customer|int $customerId Customer ID or just customer instance.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function disapproveCustomer($customerId)
+    {
+        return $this->lowLevelApi->setIdApproved($customerId, false);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param SimCard $simCard Sim card definition.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function addCustomerSim(SimCard $simCard)
+    {
+        $simCard = clone $simCard;
+        $simCard->setVerifyOnly(false);
+        if ($simCard->getMsisdn()) {
+            $msisdn = $simCard->getMsisdn();
+            $this->lowLevelApi->assignNewSim($simCard);
+        } else {
+            $simCard = $this->autoAssignNewSim($simCard);
+            $msisdn = $simCard->getMsisdn();
+        }
+        $this->lowLevelApi->activateInitialSubscription($msisdn);
+        return $this->lowLevelApi->assignNewSim($simCard);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param SimCard $simCard Sim card to validate.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function validateNewSimAssignment(SimCard $simCard)
+    {
+        $simCard = clone $simCard;
+        $simCard->setVerifyOnly(true);
+        return $this->lowLevelApi->assignNewSim($simCard);
+    }
+
+    /**
+     * Activates initial subscription.
+     *
+     * @param string $msisdn MSISDN to activate,
      *
      * @return void
      * @since 0.1.0
      */
-    public function setCredentials(Credentials $credentials)
+    public function activateInitialSubscription($msisdn)
     {
-        $this->credentials = $credentials;
-    }
-
-
-    /**
-     * Sets transport.
-     *
-     * @param TransportInterface $transport New transport.
-     *
-     * @return void
-     * @since 0.1.0
-     */
-    public function setTransport(TransportInterface $transport)
-    {
-        $this->transport = $transport;
+        $this->lowLevelApi->activateInitialSubscription($msisdn);
     }
 
     /**
-     * Calls method by it's name.
+     * Creates nw customer.
      *
-     * @param string $name Method name.
-     * @param array  $data Method parameters.
+     * @param Customer $customer Customer entity.
+     * @param Address  $address  Address entity.
      *
-     * @return ApiResponse Response data.
+     * @return ApiResponse Response.
      * @since 0.1.0
      */
-    public function callMethod($name, array $data)
+    public function createCustomer(Customer $customer, Address $address)
     {
-        $request = new ApiRequest;
-        $data['apiKey'] = $this->credentials->getApiKey();
-        $request->setData($data);
-        $request->setMethodName($name);
-        $request->setCredentials($this->credentials);
-        $httpRequest = $request->createHttpRequest();
-        $response = $this->transport->sendRequest($httpRequest);
-        $apiResponse = ApiResponse::createFromHttpResponse($response);
-        $data = $apiResponse->getData();
-        if (isset($data['exception'])) {
-            $message = sprintf(
-                'API request has failed. Returned response: ' .
-                    '[exception: `%s`, origin: `%s`]',
-                $data['exception'],
-                $data['fault']
-            );
-            throw new ApiRequestFailureException($message, $data['fault']);
+        $apiResponse = $this->lowLevelApi->createCustomer($customer);
+        $customerData = $apiResponse->getDataItem('customer');
+        $address->setCustomerId($customerData['id']);
+        $this->addAddress($address);
+        return $this->approveCustomer($customerData['id']);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param MsisdnSearchCriteria $criteria
+     *
+     * @return string New MSISDN.
+     * @since 0.1.0
+     */
+    public function getNewMsisdn(MsisdnSearchCriteria $criteria = null)
+    {
+        if (!$criteria) {
+            $criteria = new MsisdnSearchCriteria;
         }
-        return $apiResponse;
+        $criteria->setUnassigned(true);
+        $response = $this->lowLevelApi->searchMsisdn($criteria);
+        $data = $response->getData();
+        return reset($data);
     }
 
     /**
-     * Adds new customer address.
+     * {@inheritdoc}
+     *
+     * @param SimCard $simCard
+     * @param int     $retries
+     *
+     * @throws ApiOperationFailureException Thrown if API couldn't assign random
+     * msisdn in provided number of retries.
+     *
+     * @return SimCard Sim card instance.
+     * @since 0.1.0
+     */
+    public function autoAssignNewSim(SimCard $simCard, $retries = 5)
+    {
+        $msisdn = $this->getNewMsisdn();
+        $simCard = clone $simCard;
+        $initialRetries = $retries;
+        while ($retries !== 0) {
+            try {
+                $simCard->setMsisdn($msisdn);
+                $this->assignNewSim($simCard);
+                return $simCard;
+            } catch (ApiOperationFailureException $e) {
+                $retries--;
+            }
+        }
+        $message = sprintf(
+            'Failed to assign new sim in `%d` retries',
+            $initialRetries
+        );
+        throw new ApiOperationFailureException($message);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @param Address $address Address to add.
      *
@@ -135,68 +209,22 @@ class HighLevelApiClient implements HighLevelApiClientInterface
      */
     public function addAddress(Address $address)
     {
-        $address->assertAllPropertiesSetExcept(array('id'));
-        $data = array(
-            'customerId' => $address->getCustomerId(),
-            'email' => $address->getEmail(),
-            'title' => $address->getTitle(),
-            'firstName' => $address->getFirstName(),
-            'lastName' => $address->getLastName(),
-            'company' => $address->getCompany(),
-            'street' => $address->getStreet(),
-            'poBox' => $address->getPostOfficeBox(),
-            'postCode' => $address->getPostCode(),
-            'city' => $address->getCity(),
-            'state' => $address->getState(),
-            'additional' => $address->getAdditionalInformation(),
-            'country' => $address->getCountryCode(),
-            'phone' => $address->getPhone(),
-            'fax' => $address->getFax(),
-        );
-        return $this->callMethod('addAddress', $data);
+        return $this->lowLevelApi->addAddress($address);
     }
 
     /**
-     * Creates customer,
+     * Recharges account balance.
      *
-     * @param Customer $customer Customer structure.
+     * @param string $msisdn      Sim card MSISDN.
+     * @param int    $amount      Money (in x10000 of nominal).
+     * @param int    $serviceCode Service code.
+     * @param null   $message     Additional message.
      *
      * @return ApiResponse Response.
      * @since 0.1.0
      */
-    public function createCustomer(Customer $customer)
+    public function recharge($msisdn, $amount, $serviceCode, $message = null)
     {
-        $customer->assertAllPropertiesSetExcept('id');
-        $data = array(
-            'email' => $customer->getEmail(),
-            'password' => $customer->getPassword(),
-            'title' => $customer->getTitle(),
-            'firstName' => $customer->getFirstName(),
-            'lastName' => $customer->getLastName(),
-            'language' => $customer->getLanguage(),
-            'identificationNumber' => $customer->getIdentificationNumber(),
-            'identificationType' => $customer->getIdentificationType(),
-            'nationality' => $customer->getNationality(),
-            'birthDate' => $customer->getBirthDate(),
-            'confirmed' => $customer->getConfirmed(),
-        );
-        return $this->callMethod('addCustomer', $data);
-    }
-    public function approveCustomer($customerId)
-    {
-        if ($customerId instanceof Customer) {
-            $customerId = $customerId->getId();
-        }
-        $data = array(
-            'customerId' => $customerId,
-            'approved' => true,
-        );
-        return $this->callMethod('setIdApproved', $data);
-    }
-
-    public function searchMsisdn(MsisdnSearchCriteria $criteria)
-    {
-        $data = $criteria->getProperties();
-        return $this->callMethod('searchMsisdn', $data);
+        return $this->lowLevelApi->recharge($msisdn, $amount, $serviceCode, $message);
     }
 }
