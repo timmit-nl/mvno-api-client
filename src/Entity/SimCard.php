@@ -1,9 +1,6 @@
 <?php
 
 namespace Etki\MvnoApiClient\Entity;
-
-use Etki\MvnoApiClient\Entity;
-
 /**
  * This entity represents sim card.
  *
@@ -23,7 +20,7 @@ use Etki\MvnoApiClient\Entity;
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class SimCard extends Entity
+class SimCard extends AbstractEntity
 {
     /**
      * Customer ID.

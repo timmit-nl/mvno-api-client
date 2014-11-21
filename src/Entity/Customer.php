@@ -2,8 +2,6 @@
 
 namespace Etki\MvnoApiClient\Entity;
 
-use Etki\MvnoApiClient\Entity;
-
 use InvalidArgumentException;
 
 /**
@@ -34,12 +32,14 @@ use InvalidArgumentException;
  * @method bool getConfirmed()
  * @method $this setConfirmed(bool $confirmed)
  *
+ * @SuppressWarnings(PHPMD.ShortVariableName)
+ *
  * @version 0.1.0
  * @since   0.1.0
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class Customer extends Entity
+class Customer extends AbstractEntity
 {
     /**
      * Constant for specifying empty title.

@@ -2,8 +2,6 @@
 
 namespace Etki\MvnoApiClient\Entity;
 
-use Etki\MvnoApiClient\Entity;
-
 /**
  * Address entity.
  *
@@ -38,12 +36,16 @@ use Etki\MvnoApiClient\Entity;
  * @method $this setFax(string $fax)
  * @method string getFax()
  *
+ * @SuppressWarnings(PHPMD.TooManyFields)
+ * @SuppressWarnings(PHPMD.ShortVariableName)
+ * @SuppressWarnings(PHPMD.LongVariableName)
+ *
  * @version 0.1.0
  * @since   0.1.0
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class Address extends Entity
+class Address extends AbstractEntity
 {
     /**
      * Address record identifier.

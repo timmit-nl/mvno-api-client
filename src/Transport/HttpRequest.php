@@ -113,7 +113,7 @@ class HttpRequest
     {
         $headers = array();
         foreach ($headers as $header => $value) {
-            $headers[] = sprintf('%s: %s', $headers, $value);
+            $headers[] = sprintf('%s: %s', $header, $value);
         }
         return implode("\r\n", $headers);
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Etki\MvnoApiClient;
+namespace Etki\MvnoApiClient\Entity;
 
 use RuntimeException;
 use BadMethodCallException;
@@ -13,7 +13,7 @@ use BadMethodCallException;
  * @package Etki\MvnoApiClient
  * @author  Etki <etki@etki.name>
  */
-class Entity
+class AbstractEntity
 {
     /**
      * Asserts that provided property has been set.
