@@ -1,6 +1,6 @@
 <?php
 
-namespace Etki\MvnoApiClient;
+namespace Etki\MvnoApiClient\Client;
 
 /**
  * API credentials.
@@ -105,5 +105,4 @@ class Credentials
     {
         $this->apiKey = $apiKey;
     }
-
 }

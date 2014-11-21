@@ -2,7 +2,6 @@
 
 namespace Etki\MvnoApiClient\Client;
 
-use Etki\MvnoApiClient\Credentials;
 use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
@@ -12,7 +11,7 @@ use DateTime;
 use BadMethodCallException;
 
 /**
- *
+ * Base functionality for client.
  *
  * @version 0.1.0
  * @since   0.1.0

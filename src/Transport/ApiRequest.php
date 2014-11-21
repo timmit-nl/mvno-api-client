@@ -2,7 +2,7 @@
 
 namespace Etki\MvnoApiClient\Transport;
 
-use Etki\MvnoApiClient\Credentials;
+use Etki\MvnoApiClient\Client\Credentials;
 
 /**
  * This class represents single API request.

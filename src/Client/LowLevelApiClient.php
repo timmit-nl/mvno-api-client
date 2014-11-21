@@ -2,7 +2,6 @@
 
 namespace Etki\MvnoApiClient\Client;
 
-use Etki\MvnoApiClient\Credentials;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 use Etki\MvnoApiClient\Transport\TransportInterface;
