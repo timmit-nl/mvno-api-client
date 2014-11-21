@@ -17,7 +17,6 @@ test:
       - naming
       - controversial
       - design
-      - migrations
     path: src
   php_code_sniffer:
     path: src
