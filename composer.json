@@ -12,7 +12,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Etki\\MvnoApiClient": "src/"
+      "Etki\\MvnoApiClient\\": "src/"
     }
   },
   "require-dev": {
