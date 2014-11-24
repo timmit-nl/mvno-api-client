@@ -1,6 +1,6 @@
 <?php
 
-namespace Etki\MvnoApiClient\Entity;
+namespace Etki\MvnoApiClient\SearchCriteria;
 
 use InvalidArgumentException;
 
@@ -12,7 +12,7 @@ use InvalidArgumentException;
  * @package Etki\MvnoApiClient\Entity
  * @author  Etki <etki@etki.name>
  */
-class CustomerSearchParameter
+class CustomerSearchCriteria
 {
     /**
      * Constant for specifying customer search by ID.
@@ -56,7 +56,7 @@ class CustomerSearchParameter
      * @throws InvalidArgumentException Thrown if unknown parameter type is
      * provided.
      *
-     * @return self
+     * @return CustomerSearchCriteria
      * @since 0.1.0
      */
     public function __construct($type, $value)

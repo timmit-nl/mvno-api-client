@@ -7,6 +7,7 @@ use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
+use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Transport\FileGetContentsTransport;
@@ -15,7 +16,6 @@ use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Client\LowLevelApiClientInterface;
 use Etki\MvnoApiClient\Client\LowLevelApiClient;
 use Etki\MvnoApiClient\Client\HighLevelApiClientInterface;
-use BadMethodCallException;
 
 /**
  * The very very client.
@@ -53,6 +53,104 @@ class HighLevelApiClient implements HighLevelApiClientInterface
     }
 
     /**
+     * Creates new customer.
+     *
+     * @param Customer $customer Customer entity.
+     * @param Address  $address  Address entity.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function createCustomer(Customer $customer, Address $address)
+    {
+        $apiResponse = $this->lowLevelApi->createCustomer($customer);
+        $customerData = $apiResponse->getDataItem('customer');
+        $address->setCustomerId($customerData['id']);
+        $this->addAddress($address);
+        return $this->approveCustomer($customerData['id']);
+    }
+
+    /**
+     * Deletes customer by his ID.
+     *
+     * @param Customer|int $customerId
+     * @param bool         $detachSims
+     *
+     * @todo refactor, method is quite heavy.
+     *
+     * @return ApiResponse|void
+     * @since 0.1.0
+     */
+    public function deleteCustomer($customerId, $detachSims = true)
+    {
+        if ($customerId instanceof Customer) {
+            $customerId->assertPropertySet('id');
+            $customerId = $customerId->getId();
+        }
+        if ($detachSims) {
+            $response = $this->getCustomer($customerId);
+            $customer = new Customer($response->getDataItem('customer'));
+            foreach ($customer->getSims() as $msisdn) {
+                $data = array('msisdn' => $msisdn, 'customerId' => $customerId);
+                $simCard = new SimCard($data);
+                $this->detachCustomerSimCard($simCard);
+            }
+        }
+        return $this->lowLevelApi->deleteCustomer($customerId);
+    }
+
+    /**
+     * Retrieves customer using his ID.
+     *
+     * @param int $customerId Customer ID.
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function getCustomer($customerId)
+    {
+        $criteria = new CustomerSearchCriteria(
+            CustomerSearchCriteria::SEARCH_PARAMETER_ID,
+            $customerId
+        );
+        return $this->lowLevelApi->getCustomer($criteria);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $email Customer email.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function getCustomerByEmail($email)
+    {
+        $criteria = new CustomerSearchCriteria(
+            CustomerSearchCriteria::SEARCH_PARAMETER_EMAIL,
+            $email
+        );
+        return $this->lowLevelApi->getCustomer($criteria);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdn MSISDN to search with.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function getCustomerByMsisdn($msisdn)
+    {
+        $criteria = new CustomerSearchCriteria(
+            CustomerSearchCriteria::SEARCH_PARAMETER_MSISDN,
+            $msisdn
+        );
+        return $this->lowLevelApi->getCustomer($criteria);
+    }
+
+    /**
      * Saves customer as approved.
      *
      * @param Customer|int $customerId Customer ID or just customer instance.
@@ -86,7 +184,7 @@ class HighLevelApiClient implements HighLevelApiClientInterface
      * @return ApiResponse Response.
      * @since 0.1.0
      */
-    public function addCustomerSim(SimCard $simCard)
+    public function addCustomerSimCard(SimCard $simCard)
     {
         $simCard = clone $simCard;
         $simCard->setVerifyOnly(false);
@@ -99,6 +197,23 @@ class HighLevelApiClient implements HighLevelApiClientInterface
         }
         $this->lowLevelApi->activateInitialSubscription($msisdn);
         return $this->lowLevelApi->assignNewSim($simCard);
+    }
+
+    /**
+     * Detaches sim card from customer.
+     *
+     * @param SimCard $simCard Sim card instance with `msisdn` and `customerId`.
+     *
+     * @return bool|ApiResponse
+     * @since 0.1.0
+     */
+    public function detachCustomerSimCard(SimCard $simCard)
+    {
+        $simCard->assertPropertiesSet(array('customerId', 'msisdn'));
+        return $this->lowLevelApi->removeSim(
+            $simCard->getCustomerId(),
+            $simCard->getMsisdn()
+        );
     }
 
     /**
@@ -130,24 +245,6 @@ class HighLevelApiClient implements HighLevelApiClientInterface
     }
 
     /**
-     * Creates nw customer.
-     *
-     * @param Customer $customer Customer entity.
-     * @param Address  $address  Address entity.
-     *
-     * @return ApiResponse Response.
-     * @since 0.1.0
-     */
-    public function createCustomer(Customer $customer, Address $address)
-    {
-        $apiResponse = $this->lowLevelApi->createCustomer($customer);
-        $customerData = $apiResponse->getDataItem('customer');
-        $address->setCustomerId($customerData['id']);
-        $this->addAddress($address);
-        return $this->approveCustomer($customerData['id']);
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @param MsisdnSearchCriteria $criteria
@@ -169,8 +266,9 @@ class HighLevelApiClient implements HighLevelApiClientInterface
     /**
      * {@inheritdoc}
      *
-     * @param SimCard $simCard
-     * @param int     $retries
+     * @param SimCard $simCard Sim card instance.
+     * @param int     $retries Number of retries. Set to negative to get
+     *                         nearly-infinite retries.
      *
      * @throws ApiOperationFailureException Thrown if API couldn't assign random
      * msisdn in provided number of retries.
@@ -186,7 +284,7 @@ class HighLevelApiClient implements HighLevelApiClientInterface
         while ($retries !== 0) {
             try {
                 $simCard->setMsisdn($msisdn);
-                $this->assignNewSim($simCard);
+                $this->lowLevelApi->assignNewSim($simCard);
                 return $simCard;
             } catch (ApiOperationFailureException $e) {
                 $retries--;
@@ -210,6 +308,19 @@ class HighLevelApiClient implements HighLevelApiClientInterface
     public function addAddress(Address $address)
     {
         return $this->lowLevelApi->addAddress($address);
+    }
+
+    /**
+     * Deletes provided address.
+     *
+     * @param Address|int $address Address ID.
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function deleteAddress($address)
+    {
+        return $this->lowLevelApi->deleteAddress($address);
     }
 
     /**

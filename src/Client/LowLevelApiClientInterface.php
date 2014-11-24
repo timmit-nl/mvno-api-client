@@ -5,6 +5,7 @@ namespace Etki\MvnoApiClient\Client;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
@@ -30,6 +31,26 @@ interface LowLevelApiClientInterface
     public function createCustomer(Customer $customer);
 
     /**
+     * Deletes customer.
+     *
+     * @param int|Customer $customerId Customer ID or whole customer object.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function deleteCustomer($customerId);
+
+    /**
+     * Retrieves customer by search criteria.
+     *
+     * @param CustomerSearchCriteria $criteria Search criteria.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function getCustomer(CustomerSearchCriteria $criteria);
+
+    /**
      * Saves customer address.
      *
      * @param Address $address Address to save.
@@ -38,6 +59,16 @@ interface LowLevelApiClientInterface
      * @since 0.1.0
      */
     public function addAddress(Address $address);
+
+    /**
+     * Deletes selected address.
+     *
+     * @param int|Address Address ID or Address ID-containing Address entity.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function deleteAddress($addressId);
 
     /**
      * Approves customer by his ID.
@@ -54,16 +85,6 @@ interface LowLevelApiClientInterface
     public function setIdApproved($customerId, $status);
 
     /**
-     * Searches MSISDNs.
-     *
-     * @param MsisdnSearchCriteria $criteria Search criteria.
-     *
-     * @return ApiResponse Data.
-     * @since 0.1.0
-     */
-    public function searchMsisdn(MsisdnSearchCriteria $criteria);
-
-    /**
      * Assigns new sim card to customer.
      *
      * @param SimCard $simCard Sim card data.
@@ -74,6 +95,39 @@ interface LowLevelApiClientInterface
     public function assignNewSim(SimCard $simCard);
 
     /**
+     * Assigns existing sim card to customer.
+     *
+     * @param SimCard $simCard Sim card to add. Customer ID should be passed as
+     *                         one of sim card fields.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function assignExistingSim(SimCard $simCard);
+
+    /**
+     * Removes sim card from customer.
+     *
+     * @param int|Customer   $customerId Customer ID or whole customer object.
+     * @param string|SimCard $msisdn     MSISDN or sim card containing requested
+     *                                   msisdn.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function removeSim($customerId, $msisdn);
+
+    /**
+     * Searches MSISDNs.
+     *
+     * @param MsisdnSearchCriteria $criteria Search criteria.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function searchMsisdn(MsisdnSearchCriteria $criteria);
+
+    /**
      * Activates initial subscription.
      *
      * @param string $msisdn MSISDN to activate.
@@ -82,6 +136,7 @@ interface LowLevelApiClientInterface
      * @since 0.1.0
      */
     public function activateInitialSubscription($msisdn);
+
     /**
      * Recharges sim card balance.
      *

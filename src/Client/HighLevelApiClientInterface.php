@@ -4,9 +4,9 @@ namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\Address;
-use Etki\MvnoApiClient\Entity\CustomerSearchParameter;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
+use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
 
@@ -50,7 +50,7 @@ interface HighLevelApiClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    //public function deleteCustomer($id, $detachSims = true);
+    public function deleteCustomer($id, $detachSims = true);
 
     /**
      * Adds new address,
@@ -80,7 +80,7 @@ interface HighLevelApiClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    //public function deleteAddress($id);
+    public function deleteAddress($id);
 
     /**
      * Assigns new sim card to customer.
@@ -92,7 +92,17 @@ interface HighLevelApiClientInterface
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function addCustomerSim(SimCard $simCard);
+    public function addCustomerSimCard(SimCard $simCard);
+
+    /**
+     * Detaches sim card.
+     *
+     * @param SimCard $simCard Sim card to detach.
+     *
+     * @return bool
+     * @since 0.1.0
+     */
+    public function detachCustomerSimCard(SimCard $simCard);
 
     /**
      * Automatically assigns new sim card to customer.
@@ -105,14 +115,34 @@ interface HighLevelApiClientInterface
     public function autoAssignNewSim(SimCard $simCard);
 
     /**
-     * Returns customer.
+     * Fetches customer data.
      *
-     * @param CustomerSearchParameter $parameter
+     * @param int $customerId Customer id.
      *
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    //public function getCustomer(CustomerSearchParameter $parameter);
+    public function getCustomer($customerId);
+
+    /**
+     * Fetches customer data using email.
+     *
+     * @param string $email Customer email.
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function getCustomerByEmail($email);
+
+    /**
+     * Retrieves customer by MSISDN registered with him.
+     *
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function getCustomerByMsisdn($msisdn);
 
     /**
      * Returns customers.

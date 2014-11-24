@@ -31,6 +31,10 @@ use InvalidArgumentException;
  * @method $this setBirthDate(string $birthDate)
  * @method bool getConfirmed()
  * @method $this setConfirmed(bool $confirmed)
+ * @method string[] getSims()
+ * @method $this setSims(array $sims)
+ * @method array getProperties()
+ * @method $this setProperties()
  *
  * @SuppressWarnings(PHPMD.ShortVariableName)
  *
@@ -160,6 +164,20 @@ class Customer extends AbstractEntity
      * @since 0.1.0
      */
     protected $confirmed;
+    /**
+     * List of customer sim card msisdns.
+     *
+     * @type string[]
+     * @since 0.1.0
+     */
+    protected $sims = array();
+    /**
+     * Custom customer properties.
+     *
+     * @type array
+     * @since 0.1.0
+     */
+    protected $properties = array();
 
     /**
      * Returns title (as integer).

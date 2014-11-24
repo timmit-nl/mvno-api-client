@@ -16,6 +16,20 @@ use BadMethodCallException;
 class AbstractEntity
 {
     /**
+     * Initializer.
+     *
+     * @param array $properties Properties to set.
+     *
+     * @return self
+     * @since 0.1.0
+     */
+    public function __construct(array $properties = null)
+    {
+        if ($properties) {
+            $this->batchPropertySet($properties);
+        }
+    }
+    /**
      * Asserts that provided property has been set.
      *
      * @param string $propertyName Name of the property to be checked.

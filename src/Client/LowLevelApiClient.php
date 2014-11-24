@@ -4,6 +4,7 @@ namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
+use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
@@ -11,6 +12,7 @@ use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
+use InvalidArgumentException;
 
 /**
  * This is low-level API that directly implements methods specified by API.
@@ -48,6 +50,48 @@ class LowLevelApiClient extends AbstractApiClient implements
             'confirmed' => $customer->getConfirmed(),
         );
         return $this->callMethod('addCustomer', $data);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param Customer|int $customerId Customer ID.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function deleteCustomer($customerId)
+    {
+        if ($customerId instanceof Customer) {
+            $customerId->assertPropertySet('id');
+            $customerId = $customerId->getId();
+        }
+        $data = array('customerId' => $customerId,);
+        return $this->callMethod('deleteCustomer', $data);
+    }
+
+    /**
+     * Retrieves customer data.
+     *
+     * @param CustomerSearchCriteria $criteria
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function getCustomer(CustomerSearchCriteria $criteria)
+    {
+        switch ($criteria->getType()) {
+            case CustomerSearchCriteria::SEARCH_PARAMETER_ID:
+                $data = array('customerId' => $criteria->getValue());
+                break;
+            case CustomerSearchCriteria::SEARCH_PARAMETER_EMAIL:
+                $data = array('email' => $criteria->getValue());
+                break;
+            case CustomerSearchCriteria::SEARCH_PARAMETER_MSISDN:
+                $data = array('msisdn' => $criteria->getValue());
+                break;
+        }
+        $this->callMethod('getCustomer', $data);
     }
 
     /**
@@ -126,6 +170,24 @@ class LowLevelApiClient extends AbstractApiClient implements
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @param int|Address $addressId Address ID.
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function deleteAddress($addressId)
+    {
+        if ($addressId instanceof Address) {
+            $addressId->assertPropertySet('id');
+            $addressId = $addressId->getId();
+        }
+        $data = array('addressId' => $addressId);
+        return $this->callMethod('deleteAddress', $data);
+    }
+
+    /**
      * Performs MSISDN search according to criteria.
      *
      * @param MsisdnSearchCriteria $criteria Criteria that describes what to
@@ -159,6 +221,47 @@ class LowLevelApiClient extends AbstractApiClient implements
             'verifyOnly' => $simCard->getVerifyOnly(),
         );
         return $this->callMethod('assignNewSim', $data);
+    }
+
+    /**
+     * Assigns existing sim card to customer.
+     *
+     * @param SimCard $simCard Sim card definition.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function assignExistingSim(SimCard $simCard)
+    {
+        $simCard->assertPropertiesSet(array('customerId', 'msisdn',));
+        $data = array(
+            'customerId' => $simCard->getCustomerId(),
+            'msisdn' => $simCard->getMsisdn(),
+        );
+        return $this->callMethod('assignExistingSim', $data);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param Customer|int   $customerId Customer ID.
+     * @param SimCard|string $msisdn     Sim card MSISDN.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function removeSim($customerId, $msisdn)
+    {
+        if ($customerId instanceof Customer) {
+            $customerId->assertPropertySet('id');
+            $customerId = $customerId->getId();
+        }
+        if ($msisdn instanceof SimCard) {
+            $msisdn->assertPropertySet('msisdn');
+            $msisdn = $msisdn->getMsisdn();
+        }
+        $data = array('customerId' => $customerId, 'msisdn' => $msisdn);
+        return $this->callMethod('removeSim', $data);
     }
 
     /**
@@ -198,9 +301,20 @@ class LowLevelApiClient extends AbstractApiClient implements
      * @return ApiResponse API response.
      * @since 0,1,0
      */
-    public function getRate($fromCountry, $toCountry) {}
+    public function getRate($fromCountry, $toCountry)
+    {
+        $data = array();
+        foreach (array('fromCountry', 'toCountry') as $var) {
+            if (strlen($$var) !== 3) {
+                $message = '';
+                throw new InvalidArgumentException();
+            }
+            $data[$var] = $$var;
+        }
+        return $this->callMethod('getRate', $data);
+    }
     /**
-     * Get roaming rates.
+     * Gets roaming rate.
      *
      * @param string $msisdn      Sim card MSISDN.
      * @param string $msrn        Roaming zone (set as MSISDN, country code
@@ -211,7 +325,15 @@ class LowLevelApiClient extends AbstractApiClient implements
      * @return ApiResponse API response.
      * @since 0.1.0
      */
-    public function getRoamingRate($msisdn, $msrn, $destination) {}
+    public function getRoamingRate($msisdn, $msrn, $destination)
+    {
+        $data = array(
+            'msisdn' => $msisdn,
+            'msrn' => $msrn,
+            'destination' => $destination,
+        );
+        return $this->callMethod('getRoamingRate', $data);
+    }
     /**
      * {@inheritdoc}
      *
@@ -224,5 +346,11 @@ class LowLevelApiClient extends AbstractApiClient implements
     public function dispatchCard(
         array $includedFeatures,
         array $excludedFeatures
-    ) {}
+    ) {
+        $data = array(
+            'includeFeature' => $includedFeatures,
+            'excludeFeature' => $excludedFeatures
+        );
+        return $this->callMethod('dispatchCard', $data);
+    }
 }
