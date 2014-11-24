@@ -16,6 +16,7 @@ use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Client\LowLevelApiClientInterface;
 use Etki\MvnoApiClient\Client\LowLevelApiClient;
 use Etki\MvnoApiClient\Client\HighLevelApiClientInterface;
+use Etki\MvnoApiClient\Client\Credentials;
 
 /**
  * The very very client.
@@ -38,18 +39,25 @@ class HighLevelApiClient implements HighLevelApiClientInterface
     /**
      * Initializes client.
      *
-     * @param string      $apiUrl      API url.
-     * @param Credentials $credentials Connection credentials.
+     * @param string             $apiUrl      API url.
+     * @param Credentials        $credentials Connection credentials.
+     * @param TransportInterface $transport   Transport to be used.
      *
      * @return self
      * @since 0.1.0
      */
-    public function __construct($apiUrl, Credentials $credentials)
-    {
+    public function __construct(
+        $apiUrl,
+        Credentials $credentials,
+        TransportInterface $transport = null
+    ) {
         $this->lowLevelApi = new LowLevelApiClient;
         $this->lowLevelApi->setCredentials($credentials);
         $this->lowLevelApi->setApiUrl($apiUrl);
-        $this->lowLevelApi->setTransport(new FileGetContentsTransport);
+        if (!$transport) {
+            $transport = new FileGetContentsTransport;
+        }
+        $this->lowLevelApi->setTransport($transport);
     }
 
     /**
