@@ -11,7 +11,9 @@
     }
   ],
   "autoload": {
-    "Etki\\MvnoApiClient": "src/"
+    "psr-4": {
+      "Etki\\MvnoApiClient": "src/"
+    }
   },
   "require-dev": {
     "codeception/codeception": "2.1.x-dev"
