@@ -1,6 +1,6 @@
 <?php
 
-namespace Etki\MvnoApiClient;
+namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
