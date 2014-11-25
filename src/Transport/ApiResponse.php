@@ -277,7 +277,7 @@ class ApiResponse
             $message = 'Request isn\'t typical successful response';
             if (!$this->isExceptional()) {
                 $message .= sprintf(
-                    ' (error code: `%d, message: `%s`)',
+                    ' (error code: `%d`, message: `%s`)',
                     $this->data['responseCode'],
                     $this->data['responseMessage']
                 );

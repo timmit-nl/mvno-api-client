@@ -98,10 +98,12 @@ class HighLevelApiClient implements HighLevelApiClientInterface
         if ($detachSims) {
             $response = $this->getCustomer($customerId);
             $customer = new Customer($response->getDataItem('customer'));
-            foreach ($customer->getSims() as $msisdn) {
-                $data = array('msisdn' => $msisdn, 'customerId' => $customerId);
-                $simCard = new SimCard($data);
-                $this->detachCustomerSimCard($simCard);
+            if ($customer->getSims()) {
+                foreach ($customer->getSims() as $msisdn) {
+                    $data = array('msisdn' => $msisdn, 'customerId' => $customerId);
+                    $simCard = new SimCard($data);
+                    $this->detachCustomerSimCard($simCard);
+                }
             }
         }
         return $this->lowLevelApi->deleteCustomer($customerId);

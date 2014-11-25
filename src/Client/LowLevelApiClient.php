@@ -73,9 +73,10 @@ class LowLevelApiClient extends AbstractApiClient implements
     /**
      * Retrieves customer data.
      *
-     * @param CustomerSearchCriteria $criteria
+     * @param CustomerSearchCriteria $criteria Criteria required to search for
+     *                                         customer.
      *
-     * @return ApiResponse
+     * @return ApiResponse Response data.
      * @since 0.1.0
      */
     public function getCustomer(CustomerSearchCriteria $criteria)
@@ -92,7 +93,7 @@ class LowLevelApiClient extends AbstractApiClient implements
                 break;
         }
         /** @noinspection PhpUndefinedVariableInspection */
-        $this->callMethod('getCustomer', $data);
+        return $this->callMethod('getCustomer', $data);
     }
 
     /**

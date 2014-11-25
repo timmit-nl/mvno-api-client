@@ -34,6 +34,11 @@ class CurlTransport implements TransportInterface
         curl_setopt($this->handle, CURLOPT_USERAGENT, 'PHP '.PHP_VERSION.' / Naka Mobile MVNOApiJSONClient');
     }
 
+    public function setProxy($proxy)
+    {
+        curl_setopt($this->handle, CURLOPT_PROXY, $proxy);
+    }
+
     /**
      * Sends request.
      *
@@ -61,6 +66,7 @@ class CurlTransport implements TransportInterface
         curl_setopt($this->handle, CURLOPT_URL, $request->getUrl());
         curl_setopt($this->handle, CURLOPT_POSTFIELDS, $request->getPostBody());
         $postBody = curl_exec($this->handle);
+        $error = curl_error($this->handle);
         $response->setBody($postBody);
         return $response;
     }
