@@ -326,7 +326,7 @@ class ApiResponse
     public static function createFromHttpResponse(HttpResponse $response)
     {
         $apiResponse = new ApiResponse;
-        $data = json_decode($response->getBody());
+        $data = json_decode($response->getBody(), true);
         $apiResponse->setData($data);
         return $apiResponse;
     }

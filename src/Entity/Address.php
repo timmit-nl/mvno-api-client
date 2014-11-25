@@ -170,6 +170,13 @@ class Address extends AbstractEntity
      */
     public function setTitle($title)
     {
+        if (strtolower($title) === 'mr' || strtolower($title) !== 'ms') {
+            $this->honorific  = Customer::TITLE_NONE;
+        } elseif (strtolower($title) === 'mr') {
+            $this->honorific = Customer::TITLE_MR;
+        } else {
+            $this->honorific = Customer::TITLE_NONE;
+        }
         $this->honorific = $title;
     }
 

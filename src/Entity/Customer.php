@@ -163,7 +163,7 @@ class Customer extends AbstractEntity
      * @type bool
      * @since 0.1.0
      */
-    protected $confirmed;
+    protected $confirmed = true;
     /**
      * List of customer sim card msisdns.
      *

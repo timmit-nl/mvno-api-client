@@ -112,6 +112,8 @@ class AbstractEntity
     /**
      * Verifies that all properties have been set except for provided ones.
      *
+     * @param string[]|string $excludedProperties List of excluded properties.
+     *
      * @throws BadMethodCallException Thrown in case name of property not
      *                                declared in current class was requested.
      * @throws RuntimeException       Thrown in case any of declared properties
@@ -120,11 +122,14 @@ class AbstractEntity
      * @return void
      * @since 0.1.0
      */
-    public function assertAllPropertiesSetExcept(array $excludedProperties)
+    public function assertAllPropertiesSetExcept($excludedProperties)
     {
-        $allProperties = get_class_vars(get_class($this));
+        if (!is_array($excludedProperties)) {
+            $excludedProperties = array($excludedProperties);
+        }
+        $allProperties = array_keys(get_class_vars(get_class($this)));
         $propertyNames = array_diff($allProperties, $excludedProperties);
-        $this->assertAllPropertiesSet($propertyNames);
+        $this->assertPropertiesSet($propertyNames);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Etki\MvnoApiClient\Transport;
 
+use Etki\MvnoApiClient\Exception\TransportFailedRequestException;
+
 /**
  * A simple transport based on url-wrappers.
  *
@@ -54,6 +56,10 @@ class FileGetContentsTransport implements TransportInterface
             if ($raw) {
                 break;
             }
+        }
+        /** @noinspection PhpUndefinedVariableInspection */
+        if (!$raw) {
+            throw new TransportFailedRequestException;
         }
         $response->setBody($raw);
         return $response;

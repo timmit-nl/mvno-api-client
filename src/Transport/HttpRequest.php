@@ -89,7 +89,11 @@ class HttpRequest
      */
     public function getUrl()
     {
-        return $this->url;
+        $url = $this->url;
+        if ($this->getParams) {
+            $url .= '?' . $this->getQueryString();
+        }
+        return $url;
     }
 
     /**
@@ -112,10 +116,32 @@ class HttpRequest
     public function getHeaderString()
     {
         $headers = array();
-        foreach ($headers as $header => $value) {
+        foreach ($this->headers as $header => $value) {
             $headers[] = sprintf('%s: %s', $header, $value);
         }
-        return implode("\r\n", $headers);
+        return implode("\r\n", $headers) . "\r\n";
+    }
+
+    /**
+     * Returns query string.
+     *
+     * @todo refactor
+     *
+     * @return string Query string.
+     * @since 0.1.0
+     */
+    public function getQueryString()
+    {
+        $queryString = http_build_query($this->getParams);
+        foreach ($this->getParams as $param => $value) {
+            if (!$value) {
+                if ($queryString) {
+                    $queryString .= '&';
+                }
+                $queryString .= $param;
+            }
+        }
+        return $queryString;
     }
 
     /**

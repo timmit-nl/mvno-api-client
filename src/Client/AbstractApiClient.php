@@ -97,7 +97,12 @@ abstract class AbstractApiClient
         $request->setData($data);
         $request->setMethodName($name);
         $request->setCredentials($this->credentials);
+        $request->setUrl($this->apiUrl);
         $httpRequest = $request->createHttpRequest();
+        $httpRequest->addHeader(
+            'Content-Type',
+            'application/x-www-form-urlencoded'
+        );
         $response = $this->transport->sendRequest($httpRequest);
         $apiResponse = ApiResponse::createFromHttpResponse($response);
         $this->validateResponse($apiResponse);

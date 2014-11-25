@@ -49,7 +49,7 @@ class LowLevelApiClient extends AbstractApiClient implements
             'birthDate' => $customer->getBirthDate(),
             'confirmed' => $customer->getConfirmed(),
         );
-        return $this->callMethod('addCustomer', $data);
+        return $this->callMethod('createCustomer', $data);
     }
 
     /**
@@ -91,6 +91,7 @@ class LowLevelApiClient extends AbstractApiClient implements
                 $data = array('msisdn' => $criteria->getValue());
                 break;
         }
+        /** @noinspection PhpUndefinedVariableInspection */
         $this->callMethod('getCustomer', $data);
     }
 
@@ -306,8 +307,11 @@ class LowLevelApiClient extends AbstractApiClient implements
         $data = array();
         foreach (array('fromCountry', 'toCountry') as $var) {
             if (strlen($$var) !== 3) {
-                $message = '';
-                throw new InvalidArgumentException();
+                $message = sprintf(
+                    'Parameter `%s` has to be three-letter country code ' .
+                    '(got `%s` instead)'
+                );
+                throw new InvalidArgumentException($message);
             }
             $data[$var] = $$var;
         }
