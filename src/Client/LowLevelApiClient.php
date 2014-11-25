@@ -148,7 +148,14 @@ class LowLevelApiClient extends AbstractApiClient implements
      */
     public function addAddress(Address $address)
     {
-        $excludedProperties = array('id',);
+        $excludedProperties = array(
+            'id',
+            'additionalInformation',
+            'fax',
+            'phone',
+            'postOfficeBox',
+            'company',
+        );
         $address->assertAllPropertiesSetExcept($excludedProperties);
         $data = array(
             'customerId' => $address->getCustomerId(),
