@@ -275,6 +275,13 @@ class ApiResponse
     {
         if (!$this->isSuccessful()) {
             $message = 'Request isn\'t typical successful response';
+            if (!$this->isExceptional()) {
+                $message .= sprintf(
+                    ' (error code: `%d, message: `%s`)',
+                    $this->data['responseCode'],
+                    $this->data['responseMessage']
+                );
+            }
             throw new BadMethodCallException($message);
         }
     }
