@@ -150,6 +150,14 @@ class ApiRequest
         $request = new HttpRequest;
         $request->setUrl($this->getUrl());
         $request->addGetParam($this->getMethodName());
+        $dataString = base64_encode(
+            sprintf(
+                '%s:%s',
+                $this->credentials->getUsername(),
+                $this->credentials->getPassword()
+            )
+        );
+        $request->addHeader('Authorization', 'Basic ' . $dataString);
         $request->setPostBody(json_encode($this->data));
         return $request;
     }

@@ -119,7 +119,7 @@ class HttpRequest
         foreach ($this->headers as $header => $value) {
             $headers[] = sprintf('%s: %s', $header, $value);
         }
-        return implode("\r\n", $headers) . "\r\n";
+        return implode("\r\n", $headers) . "\r\n\r\n";
     }
 
     /**
