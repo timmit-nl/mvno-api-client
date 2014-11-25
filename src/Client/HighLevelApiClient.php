@@ -10,7 +10,7 @@ use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Transport\FileGetContentsTransport;
+use Etki\MvnoApiClient\Transport\CurlTransport;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Client\LowLevelApiClientInterface;
@@ -55,7 +55,7 @@ class HighLevelApiClient implements HighLevelApiClientInterface
         $this->lowLevelApi->setCredentials($credentials);
         $this->lowLevelApi->setApiUrl($apiUrl);
         if (!$transport) {
-            $transport = new FileGetContentsTransport;
+            $transport = new CurlTransport;
         }
         $this->lowLevelApi->setTransport($transport);
     }
