@@ -2,12 +2,14 @@
 
 namespace Etki\MvnoApiClient\Client;
 
-use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
+use Etki\MvnoApiClient\Exception\Api\Manager;
+use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
+use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
+use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
+use Etki\MvnoApiClient\Log\ApiLoggerInterface;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
-use DateTime;
 use BadMethodCallException;
 
 /**
@@ -18,7 +20,7 @@ use BadMethodCallException;
  * @package Etki\MvnoApiClient\Client
  * @author  Etki <etki@etki.name>
  */
-abstract class AbstractApiClient
+abstract class AbstractApiClient implements ApiLoggerAwareInterface
 {
     /**
      * URL where requests should go.
@@ -41,6 +43,13 @@ abstract class AbstractApiClient
      * @since 0.1.0
      */
     protected $transport;
+    /**
+     * List of attached loggers.
+     *
+     * @type ApiLoggerInterface[]
+     * @since 0.1.0
+     */
+    protected $loggers = array();
 
     /**
      * Sets credentials.
@@ -66,6 +75,19 @@ abstract class AbstractApiClient
     public function setTransport(TransportInterface $transport)
     {
         $this->transport = $transport;
+    }
+
+    /**
+     * Attaches new logger.
+     *
+     * @param ApiLoggerInterface $logger Logger instance.
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setRequestLogger(ApiLoggerInterface $logger)
+    {
+        $this->loggers[] = $logger;
     }
 
     /**
@@ -105,6 +127,9 @@ abstract class AbstractApiClient
         );
         $response = $this->transport->sendRequest($httpRequest);
         $apiResponse = ApiResponse::createFromHttpResponse($response);
+        foreach ($this->loggers as $logger) {
+            $logger->log($request, $apiResponse);
+        }
         $this->validateResponse($apiResponse);
         return $apiResponse;
     }
@@ -138,12 +163,8 @@ abstract class AbstractApiClient
             throw new ApiRequestFailureException($message, $origin);
         }
         if (!$response->isSuccessful()) {
-            $message = sprintf(
-                'API operation failed with message `%s` on `%s`',
-                $response->getResponseMessage(),
-                $response->getDateTime()->format(DateTime::ISO8601)
-            );
-            throw new ApiOperationFailureException($message);
+            $manager = new Manager;
+            throw $manager->generateApiOperationException($response);
         }
     }
 

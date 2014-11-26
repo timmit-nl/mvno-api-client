@@ -2,7 +2,7 @@
 
 namespace Etki\MvnoApiClient\Transport;
 
-use Etki\MvnoApiClient\Exception\MalformedApiRequestException;
+use Etki\MvnoApiClient\Exception\Api\MalformedApiRequestException;
 use DateTime;
 use BadMethodCallException;
 
@@ -121,7 +121,7 @@ class ApiResponse
     public function hasDataItem($itemKey)
     {
         $this->assertDataHasBeenSet();
-        return isset($this->data[$itemKey]);
+        return array_key_exists($itemKey, $this->data);
     }
 
     /**

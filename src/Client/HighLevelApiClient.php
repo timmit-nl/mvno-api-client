@@ -4,9 +4,12 @@ namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
+use Etki\MvnoApiClient\Entity\RateData;
 use Etki\MvnoApiClient\Entity\SimCard;
-use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
-use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
+use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
+use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
+use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
+use Etki\MvnoApiClient\Log\ApiLoggerInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
@@ -26,7 +29,9 @@ use Etki\MvnoApiClient\Client\Credentials;
  * @package Etki\MvnoApiClient
  * @author  Etki <etki@etki.name>
  */
-class HighLevelApiClient implements HighLevelApiClientInterface
+class HighLevelApiClient implements
+    HighLevelApiClientInterface,
+    ApiLoggerAwareInterface
 {
     /**
      * Low-level API handle.
@@ -58,6 +63,19 @@ class HighLevelApiClient implements HighLevelApiClientInterface
             $transport = new CurlTransport;
         }
         $this->lowLevelApi->setTransport($transport);
+    }
+
+    /**
+     * Adds new request logger.
+     *
+     * @param ApiLoggerInterface $logger Logger.
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setRequestLogger(ApiLoggerInterface $logger)
+    {
+        $this->lowLevelApi->setRequestLogger($logger);
     }
 
     /**
@@ -346,6 +364,81 @@ class HighLevelApiClient implements HighLevelApiClientInterface
      */
     public function recharge($msisdn, $amount, $serviceCode, $message = null)
     {
-        return $this->lowLevelApi->recharge($msisdn, $amount, $serviceCode, $message);
+        return $this->lowLevelApi->recharge(
+            $msisdn,
+            $amount,
+            $serviceCode,
+            $message
+        );
+    }
+
+    /**
+     * Gets rates between two countries.
+     *
+     * @param string $fromCountry Country interactions are being made from.
+     * @param string $toCountry   Country calls are made to.
+     *
+     * @return RateData[] List of rate data.
+     * @since 0.1.0
+     */
+    public function getRate($fromCountry, $toCountry)
+    {
+        $response = $this->lowLevelApi->getRate($fromCountry, $toCountry);
+        $data = array();
+        $keys = array(
+            'rate' => 'rate',
+            'setup' => 'setup',
+            'ratelocal' => 'rateLocal',
+            'setuplocal' => 'setupLocal',
+        );
+        foreach ($keys as $apiKey => $appKey) {
+            $data[$appKey] = null;
+            if ($response->hasDataItem($apiKey)
+                && $response->getDataItem($apiKey)
+            ) {
+                $data[$appKey] = new RateData($response->getDataItem($apiKey));
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Returns list of cross-rates for selected countries.
+     *
+     * @param string[] $countries List of country 3-letter ISO-3166 codes.
+     *
+     * @return array List of lists of rates for calls between two countries.
+     * @since 0.1.0
+     */
+    public function getCrossRates(array $countries)
+    {
+        $length = 3; //sizeof($countries);
+        $countries = array_unique($countries);
+        $rates = array();
+        $failedCountries = array();
+        for ($i = 0; $i < $length; $i++) {
+            for ($j = 0; $j < $length; $j++) {
+                if ($j === $i || in_array($i, $failedCountries)
+                    || in_array($j, $failedCountries)
+                ) {
+                    continue;
+                }
+                $countryA = $countries[$i];
+                $countryB = $countries[$j];
+                $key = $countryA . ':' . $countryB;
+                try {
+                    $rates[$key] = array(
+                        'from' => $countryA,
+                        'to' => $countryB,
+                        'rates' => $this->getRate($countryA, $countryB)
+                    );
+                    echo 'Successfully got rates for ' . $key . PHP_EOL;
+                } catch (ApiOperationFailureException $e) {
+                    // @todo add proper logging
+                    echo 'Failed to get rates for ' . $key . PHP_EOL;
+                }
+            }
+        }
+        return $rates;
     }
 }

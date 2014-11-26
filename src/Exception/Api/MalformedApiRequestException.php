@@ -1,6 +1,6 @@
 <?php
 
-namespace Etki\MvnoApiClient\Exception;
+namespace Etki\MvnoApiClient\Exception\Api;
 
 use \Exception;
 

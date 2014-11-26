@@ -3,12 +3,13 @@
 namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\SimCard;
-use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
+use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
+use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
+use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Exception\ApiRequestFailureException;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
@@ -117,12 +118,7 @@ class LowLevelApiClient extends AbstractApiClient implements
             'customerId' => $customerId,
             'approved' => $status,
         );
-        $response = $this->callMethod('setIdApproved', $data);
-        $data = $response->getData();
-        if (!$data['responseStatus']) {
-            throw new ApiOperationFailureException;
-        }
-        return $response;
+        return $this->callMethod('setIdApproved', $data);
     }
 
     /**
