@@ -6,6 +6,7 @@ use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\RateData;
 use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\Entity\Subscription;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
 use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
 use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
@@ -264,12 +265,12 @@ class HighLevelApiClient implements
      *
      * @param string $msisdn MSISDN to activate,
      *
-     * @return void
+     * @return ApiResponse API response.
      * @since 0.1.0
      */
     public function activateInitialSubscription($msisdn)
     {
-        $this->lowLevelApi->activateInitialSubscription($msisdn);
+        return $this->lowLevelApi->activateInitialSubscription($msisdn);
     }
 
     /**
@@ -440,5 +441,66 @@ class HighLevelApiClient implements
             }
         }
         return $rates;
+    }
+
+    /**
+     * Gets roaming rate.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param string $msrn        Partial (at least country code prefix) or complete roaming number.
+     * @param string $destination Partial (at least country code prefix) or complete destination number.
+     *
+     * @return int Roaming rate.
+     * @since 0.1.0
+     */
+    public function getRoamingRate($msisdn, $msrn, $destination)
+    {
+        $response = $this->lowLevelApi->getRoamingRate(
+            $msisdn,
+            $msrn,
+            $destination
+        );
+        return $response->getDataItem('rate');
+    }
+
+    /**
+     * Returns subscriptions for particular sim card.
+     *
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @todo refactor
+     * @return Subscription[][] Subscribed / available / all subscriptions list.
+     * @since 0.1.0
+     */
+    public function getSubscriptions($msisdn)
+    {
+        $response = $this->lowLevelApi->getSubscriptions($msisdn);
+        $subscriptions = array(
+            'available' => array(),
+            'subscribed' => array(),
+            'all' => array(),
+        );
+        if ($response->hasDataItem('subscribed')) {
+            $subscribed = $response->getDataItem('subscribed');
+            if ($subscribed) {
+                foreach ($subscribed as $subscriptionData) {
+                    $subscription = new Subscription($subscriptionData);
+                    $subscriptions['subscribed'][] = $subscription;
+                    $subscriptions['all'][] = $subscription;
+                }
+
+            }
+        }
+        if ($response->hasDataItem('available')) {
+            $available = $response->getDataItem('available');
+            if ($available) {
+                foreach ($available as $subscriptionData) {
+                    $subscription = new Subscription($subscriptionData);
+                    $subscriptions['available'][] = $subscription;
+                    $subscriptions['all'][] = $subscription;
+                }
+            }
+        }
+        return $subscriptions;
     }
 }

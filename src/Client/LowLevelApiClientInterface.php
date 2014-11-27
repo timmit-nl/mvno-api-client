@@ -8,7 +8,7 @@ use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
-use Etki\MvnoApiClient\Exception\ApiOperationFailureException;
+use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
 
 /**
  * This interface describes low-level API.
@@ -162,8 +162,9 @@ interface LowLevelApiClientInterface
      */
     public function getRate($fromCountry, $toCountry);
 
+
     /**
-     * Get roaming rates.
+     * Gets roaming rates.
      *
      * @param string $msisdn      Sim card MSISDN.
      * @param string $msrn        Roaming zone (set as MSISDN, country code
@@ -191,4 +192,14 @@ interface LowLevelApiClientInterface
         array $includedFeatures,
         array $excludedFeatures
     );
+
+    /**
+     * Returns lists of available and subscribed subscriptions.
+     *
+     * @param string $msisdn
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function getSubscriptions($msisdn);
 }

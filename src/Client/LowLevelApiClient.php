@@ -361,4 +361,18 @@ class LowLevelApiClient extends AbstractApiClient implements
         );
         return $this->callMethod('dispatchCard', $data);
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function getSubscriptions($msisdn)
+    {
+        $data = array('msisdn' => $msisdn);
+        return $this->callMethod('getSubscriptions', $data);
+    }
 }
