@@ -313,7 +313,9 @@ class LowLevelApiClient extends AbstractApiClient implements
             if (strlen($$var) !== 3) {
                 $message = sprintf(
                     'Parameter `%s` has to be three-letter country code ' .
-                    '(got `%s` instead)'
+                    '(got `%s` instead)',
+                    $var,
+                    $$var
                 );
                 throw new InvalidArgumentException($message);
             }

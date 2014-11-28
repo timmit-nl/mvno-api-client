@@ -7,6 +7,8 @@ namespace Etki\MvnoApiClient\Entity;
  *
  * @method $this setId(int $id)
  * @method int getId()
+ * @method $this setSubId(int $id)
+ * @method int getSubId()
  * @method $this setPackageId(int $packageId)
  * @method int getPackageId()
  * @method $this setName(string $name)
