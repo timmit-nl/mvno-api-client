@@ -105,7 +105,8 @@ class AbstractEntity
      */
     public function assertAllPropertiesSet()
     {
-        $this->assertPropertiesSet(get_class_vars(get_class($this)));
+        $keys = array_keys(get_class_vars(get_class($this)));
+        $this->assertPropertiesSet($keys);
     }
 
 
