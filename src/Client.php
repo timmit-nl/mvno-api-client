@@ -1,6 +1,7 @@
 <?php
 
 namespace Etki\MvnoApiClient;
+
 use Etki\MvnoApiClient\Client\HighLevelApiClient;
 
 /**
