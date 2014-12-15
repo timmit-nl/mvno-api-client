@@ -6,6 +6,7 @@ use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\RateData;
 use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\Entity\SimCardBalance;
 use Etki\MvnoApiClient\Entity\Subscription;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
 use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
@@ -502,5 +503,23 @@ class HighLevelApiClient implements
             }
         }
         return $subscriptions;
+    }
+
+    /**
+     * Retrieves sim card balance
+     *
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return SimCardBalance
+     * @since 0.1.0
+     */
+    public function getBalance($msisdn)
+    {
+        $response = $this->lowLevelApi->getBalance($msisdn);
+        $balance = new SimCardBalance;
+        $balance->setBalance($response->getDataItem('balance'));
+        $balance->setCurrency($response->getDataItem('currency'));
+        $balance->setIsPostPaid($response->getDataItem('postpaid'));
+        return $balance;
     }
 }

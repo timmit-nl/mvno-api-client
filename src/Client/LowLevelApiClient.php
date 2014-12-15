@@ -377,4 +377,18 @@ class LowLevelApiClient extends AbstractApiClient implements
         $data = array('msisdn' => $msisdn);
         return $this->callMethod('getSubscriptions', $data);
     }
+
+    /**
+     * Returns phone balance.
+     *
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function getBalance($msisdn)
+    {
+        $data = array('msisdn' => $msisdn);
+        return $this->callMethod('getBalance', $data);
+    }
 }
