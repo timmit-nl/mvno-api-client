@@ -94,6 +94,7 @@ class HighLevelApiClient implements
         $apiResponse = $this->lowLevelApi->createCustomer($customer);
         $customerData = $apiResponse->getDataItem('customer');
         $address->setCustomerId($customerData['id']);
+        $customer->setId($customerData['id']);
         $this->addAddress($address);
         return $this->approveCustomer($customerData['id']);
     }
