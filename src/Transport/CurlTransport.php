@@ -28,7 +28,7 @@ class CurlTransport implements TransportInterface
      * @type int
      * @since 0.1.0
      */
-    protected $timeout = 1000;
+    protected $timeout = 3000;
 
     /**
      * Initializer.

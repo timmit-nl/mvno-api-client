@@ -165,19 +165,20 @@ class Address extends AbstractEntity
      *
      * @param string $title Title (honorific) to set.
      *
-     * @return void
+     * @return $this Current instance.
      * @since 0.1.0
      */
     public function setTitle($title)
     {
-        if (strtolower($title) === 'mr' || strtolower($title) !== 'ms') {
-            $this->honorific  = Customer::TITLE_NONE;
+        if (strtolower($title) === 'ms') {
+            $this->honorific = Customer::TITLE_NONE;
         } elseif (strtolower($title) === 'mr') {
             $this->honorific = Customer::TITLE_MR;
         } else {
             $this->honorific = Customer::TITLE_NONE;
         }
         $this->honorific = $title;
+        return $this;
     }
 
     /**

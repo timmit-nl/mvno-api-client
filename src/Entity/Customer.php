@@ -202,6 +202,7 @@ class Customer extends AbstractEntity
     {
         if (is_int($title)) {
             $this->honorific = $title;
+            return $this;
         }
         $title = strtolower($title);
         switch ($title) {

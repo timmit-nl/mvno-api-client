@@ -57,5 +57,5 @@ class SimCard extends AbstractEntity
      * @type bool
      * @since 0.1.0
      */
-    protected $verifyOnly;
+    protected $verifyOnly = false;
 }

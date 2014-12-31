@@ -3,12 +3,8 @@
 namespace Etki\MvnoApiClient\Client;
 
 use Etki\MvnoApiClient\Entity\SimCard;
-use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
-use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
-use Etki\MvnoApiClient\Transport\TransportInterface;
-use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
@@ -36,7 +32,9 @@ class LowLevelApiClient extends AbstractApiClient implements
      */
     public function createCustomer(Customer $customer)
     {
-        $customer->assertAllPropertiesSetExcept('id');
+        $customer->assertAllPropertiesSetExcept(
+            array('id', 'state', 'sims', 'properties',)
+        );
         $data = array(
             'email' => $customer->getEmail(),
             'password' => $customer->getPassword(),
@@ -152,6 +150,7 @@ class LowLevelApiClient extends AbstractApiClient implements
             'phone',
             'postOfficeBox',
             'company',
+            'state',
         );
         $address->assertAllPropertiesSetExcept($excludedProperties);
         $data = array(

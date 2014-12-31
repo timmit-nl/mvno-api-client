@@ -9,19 +9,13 @@ use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\Entity\SimCardBalance;
 use Etki\MvnoApiClient\Entity\Subscription;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
-use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
 use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
 use Etki\MvnoApiClient\Log\ApiLoggerInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Transport\CurlTransport;
-use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\TransportInterface;
-use Etki\MvnoApiClient\Client\LowLevelApiClientInterface;
-use Etki\MvnoApiClient\Client\LowLevelApiClient;
-use Etki\MvnoApiClient\Client\HighLevelApiClientInterface;
-use Etki\MvnoApiClient\Client\Credentials;
 
 /**
  * The very very client.
@@ -86,17 +80,27 @@ class HighLevelApiClient implements
      * @param Customer $customer Customer entity.
      * @param Address  $address  Address entity.
      *
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     *
      * @return ApiResponse Response.
      * @since 0.1.0
      */
     public function createCustomer(Customer $customer, Address $address)
     {
-        $apiResponse = $this->lowLevelApi->createCustomer($customer);
+        $criteria = new CustomerSearchCriteria(
+            CustomerSearchCriteria::SEARCH_PARAMETER_EMAIL,
+            $customer->getEmail()
+        );
+        $apiResponse = $this->lowLevelApi->getCustomer($criteria);
+        if (!$apiResponse->getDataItem('customer')) {
+            $apiResponse = $this->lowLevelApi->createCustomer($customer);
+        }
         $customerData = $apiResponse->getDataItem('customer');
         $address->setCustomerId($customerData['id']);
         $customer->setId($customerData['id']);
-        $this->addAddress($address);
-        return $this->approveCustomer($customerData['id']);
+        $addressResponse = $this->addAddress($address);
+        $approvalResponse = $this->approveCustomer($customerData['id']);
+        return $customer;
     }
 
     /**

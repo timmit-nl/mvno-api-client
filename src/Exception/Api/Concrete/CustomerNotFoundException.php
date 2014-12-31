@@ -1,6 +1,8 @@
 <?php
 
-namespace Etki\MvnoApiClient\Exception\Api\Exact;
+namespace Etki\MvnoApiClient\Exception\Api\Concrete;
+
+use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
 
 /**
  * Thrown whenever customer can't be found.
@@ -10,7 +12,7 @@ namespace Etki\MvnoApiClient\Exception\Api\Exact;
  * @package Etki\MvnoApiClient\Exception\Api\Exact
  * @author  Etki <etki@etki.name>
  */
-class CustomerNotFoundException
+class CustomerNotFoundException extends ApiRequestFailureException
 {
 
 }
