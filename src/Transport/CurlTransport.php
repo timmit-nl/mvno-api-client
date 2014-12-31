@@ -93,7 +93,7 @@ class CurlTransport implements TransportInterface
         foreach ($headers as $header => $value) {
             $renderedHeaders[] = sprintf('%s: %s', $header, $value);
         }
-        curl_setopt($this->handle, CURLOPT_TIMEOUT, 1);
+        curl_setopt($this->handle, CURLOPT_TIMEOUT_MS, $this->timeout);
         curl_setopt($this->handle, CURLOPT_HTTPHEADER, $renderedHeaders);
         curl_setopt($this->handle, CURLOPT_URL, $request->getUrl());
         curl_setopt($this->handle, CURLOPT_POSTFIELDS, $request->getPostBody());
