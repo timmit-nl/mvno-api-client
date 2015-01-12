@@ -1,6 +1,6 @@
 <?php
 
-namespace Etki\MvnoApiClient\Exception\Api\Exact;
+namespace Etki\MvnoApiClient\Exception\Api\Concrete;
 
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
 
@@ -9,7 +9,7 @@ use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
  * in use.
  *
  * @version 0.1.0
- * @since   
+ * @since   0.1.0
  * @package Etki\MvnoApiClient\Exception\Api\Exact
  * @author  Etki <etki@etki.name>
  */

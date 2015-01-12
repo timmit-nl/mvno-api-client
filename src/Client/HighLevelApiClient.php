@@ -91,8 +91,10 @@ class HighLevelApiClient implements
             CustomerSearchCriteria::SEARCH_PARAMETER_EMAIL,
             $customer->getEmail()
         );
-        $apiResponse = $this->lowLevelApi->getCustomer($criteria);
-        if (!$apiResponse->getDataItem('customer')) {
+        try {
+            $apiResponse = $this->lowLevelApi->getCustomer($criteria);
+        } catch (ApiOperationFailureException $e) {}
+        if (!isset($apiResponse) || !$apiResponse->getDataItem('customer')) {
             $apiResponse = $this->lowLevelApi->createCustomer($customer);
         }
         $customerData = $apiResponse->getDataItem('customer');
@@ -295,7 +297,13 @@ class HighLevelApiClient implements
         $criteria->setUnassigned(true);
         $response = $this->lowLevelApi->searchMsisdn($criteria);
         $data = $response->getData();
-        return reset($data);
+        $msisdns = $data['msisdns'];
+        if (is_array($msisdns)) {
+            return reset($msisdns);
+        }
+        throw new ApiOperationFailureException(
+            'Couldn\'t find any sim matching provided criteria'
+        );
     }
 
     /**
@@ -313,7 +321,8 @@ class HighLevelApiClient implements
      */
     public function autoAssignNewSim(SimCard $simCard, $retries = 5)
     {
-        $msisdn = $this->getNewMsisdn();
+        $criteria = new MsisdnSearchCriteria();
+        $msisdn = $this->getNewMsisdn($criteria);
         $simCard = clone $simCard;
         $initialRetries = $retries;
         while ($retries !== 0) {
@@ -322,6 +331,7 @@ class HighLevelApiClient implements
                 $this->lowLevelApi->assignNewSim($simCard);
                 return $simCard;
             } catch (ApiOperationFailureException $e) {
+                $msisdn = $this->getNewMsisdn($criteria);
                 $retries--;
             }
         }
@@ -526,5 +536,20 @@ class HighLevelApiClient implements
         $balance->setCurrency($response->getDataItem('currency'));
         $balance->setIsPostPaid($response->getDataItem('postpaid'));
         return $balance;
+    }
+
+    /**
+     * Removes customer sim card.
+     *
+     * @param int    $customerId Customer ID.
+     * @param string $msisdn     Sim card MSISDN.
+     *
+     * @return bool
+     * @since 0.1.0
+     */
+    public function removeSim($customerId, $msisdn)
+    {
+        $response = $this->lowLevelApi->removeSim($customerId, $msisdn);
+        return $response->isSuccessful();
     }
 }
