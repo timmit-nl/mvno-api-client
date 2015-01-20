@@ -13,6 +13,7 @@ use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
 use Etki\MvnoApiClient\Log\ApiLoggerInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
+use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Transport\CurlTransport;
 use Etki\MvnoApiClient\Transport\TransportInterface;
@@ -551,5 +552,25 @@ class HighLevelApiClient implements
     {
         $response = $this->lowLevelApi->removeSim($customerId, $msisdn);
         return $response->isSuccessful();
+    }
+
+    /**
+     * Sends lot of requests at once.
+     *
+     * @param ApiRequest[] $requests
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function combinedRequest(array $requests)
+    {
+        $payload = array();
+        foreach ($requests as $request) {
+            $payload[] = array(
+                'method' => $request->getMethodName(),
+                'parameters' => $request->getData(),
+            );
+        }
+        return $this->lowLevelApi->combinedRequest($payload);
     }
 }

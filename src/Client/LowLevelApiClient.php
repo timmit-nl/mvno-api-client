@@ -390,4 +390,25 @@ class LowLevelApiClient extends AbstractApiClient implements
         $data = array('msisdn' => $msisdn);
         return $this->callMethod('getBalance', $data);
     }
+
+    /**
+     * Performs combined request.
+     *
+     * @param array $requests Requests in [method => parameters] format.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function combinedRequest(array $requests)
+    {
+        $data = array(
+            'methods' => array(),
+            'parameters' => array(),
+        );
+        foreach ($requests as $tuple) {
+            $data['methods'][] = $tuple['method'];
+            $data['parameters'][] = $tuple['parameters'] ? $tuple['parameters'] : array();
+        }
+        return $this->callMethod('combinedRequest', $data);
+    }
 }
