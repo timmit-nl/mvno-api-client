@@ -43,4 +43,3 @@ class RateData extends AbstractEntity
     const TYPE_SETUP = 'setup';
     const TYPE_RATE = 'rate';
 }
- 
