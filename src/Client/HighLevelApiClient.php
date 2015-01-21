@@ -94,7 +94,8 @@ class HighLevelApiClient implements
         );
         try {
             $apiResponse = $this->lowLevelApi->getCustomer($criteria);
-        } catch (ApiOperationFailureException $e) {}
+        } catch (ApiOperationFailureException $e) {
+        }
         if (!isset($apiResponse) || !$apiResponse->getDataItem('customer')) {
             $apiResponse = $this->lowLevelApi->createCustomer($customer);
         }
@@ -402,22 +403,12 @@ class HighLevelApiClient implements
     public function getRate($fromCountry, $toCountry)
     {
         $response = $this->lowLevelApi->getRate($fromCountry, $toCountry);
-        $data = array();
-        $keys = array(
-            'rate' => 'rate',
-            'setup' => 'setup',
-            'ratelocal' => 'rateLocal',
-            'setuplocal' => 'setupLocal',
-        );
-        foreach ($keys as $apiKey => $appKey) {
-            $data[$appKey] = null;
-            if ($response->hasDataItem($apiKey)
-                && $response->getDataItem($apiKey)
-            ) {
-                $data[$appKey] = new RateData($response->getDataItem($apiKey));
-            }
+        $outputData = array();
+        $responseData = $response->getData();
+        foreach ($responseData as $key => $rateData) {
+            $outputData[$key] = is_array($rateData) ? new RateData($rateData) : null;
         }
-        return $data;
+        return $outputData;
     }
 
     /**
