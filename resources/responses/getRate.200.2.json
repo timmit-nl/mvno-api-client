@@ -1,0 +1,33 @@
+{
+  "data": {
+    "rate": {
+      "data": null,
+      "mofix": null,
+      "molocal": null,
+      "momob": null,
+      "moonnet": null,
+      "mosms": null,
+      "mosmslocal": null,
+      "mt": null,
+      "sms": null,
+      "voipfix": 1000,
+      "voipmob": 1500
+    },
+    "setup": {
+      "data": null,
+      "mofix": null,
+      "molocal": null,
+      "momob": null,
+      "moonnet": null,
+      "mosms": null,
+      "mosmslocal": null,
+      "mt": null,
+      "sms": null,
+      "voipfix": 0,
+      "voipmob": 0
+    },
+    "setup_eu": {},
+    "setuplocal": {},
+    "timestamp": "2015-02-18T14:07:53.639371"
+  }
+}

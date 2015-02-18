@@ -1,0 +1,30 @@
+{
+  "data": {
+    "balance": 3237952,
+    "currency": "EUR",
+    "customerId": 540,
+    "dataProfile": true,
+    "displayedMsisdn": false,
+    "extraImsi": {
+      "es": "214035011112499"
+    },
+    "extraMsisdn": {
+      "es": "34600000000"
+    },
+    "feature": "",
+    "iccid": "8944501103143424999",
+    "language": "en",
+    "msisdn": "447900000000",
+    "ota": true,
+    "otaupdate": {},
+    "pin": "0000",
+    "pin2": "2135",
+    "postpaid": false,
+    "primaryImsi": "234507092342499",
+    "puk": "10724342",
+    "puk2": "32541293",
+    "sipPassword": false,
+    "status": true,
+    "timestamp": "2015-02-18T13:47:26.170868"
+  }
+}

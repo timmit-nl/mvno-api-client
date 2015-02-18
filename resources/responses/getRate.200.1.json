@@ -1,0 +1,30 @@
+{
+  "data": {
+    "rate": {
+      "data": 3500,
+      "mofix": 1000,
+      "molocal": 2000,
+      "momob": 2000,
+      "moonnet": 1000,
+      "mosms": 4000,
+      "mosmslocal": 2500,
+      "mt": 0,
+      "sms": 2500,
+      "voipfix": 1000,
+      "voipmob": 1000
+    },
+    "setup": {
+      "data": 0,
+      "mofix": 0,
+      "molocal": 0,
+      "momob": 0,
+      "moonnet": 0,
+      "mosms": 0,
+      "mt": 0,
+      "voipfix": 0,
+      "voipmob": 0
+    },
+    "setup_eu": {},
+    "setuplocal": {}
+  }
+}
