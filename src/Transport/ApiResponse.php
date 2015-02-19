@@ -64,7 +64,6 @@ class ApiResponse
             $requiredKeys = array(
                 'responseStatus',
                 'responseCode',
-                'responseMessage',
                 'timestamp',
             );
         }
