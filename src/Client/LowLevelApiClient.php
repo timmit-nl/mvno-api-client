@@ -14,7 +14,7 @@ use InvalidArgumentException;
 /**
  * This is low-level API that directly implements methods specified by API.
  *
- * @version 0.1.0
+ * @version 0.1.1
  * @since   0.1.0
  * @package Etki\MvnoApiClient\Client
  * @author  Etki <etki@etki.name>
@@ -203,6 +203,9 @@ class LowLevelApiClient extends AbstractApiClient implements
     public function searchMsisdn(MsisdnSearchCriteria $criteria)
     {
         $data = $criteria->getProperties();
+        if (empty($data['countryCode'])) {
+            $data['countryCode'] = MsisdnSearchCriteria::DEFAULT_COUNTRY_CODE;
+        }
         return $this->callMethod('searchMsisdn', $data);
     }
 

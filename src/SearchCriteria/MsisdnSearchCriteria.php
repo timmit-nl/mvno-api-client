@@ -18,13 +18,19 @@ namespace Etki\MvnoApiClient\SearchCriteria;
  * @method $this setCountryCode(string $countryCode)
  * @method string getCountryCode()
  *
- * @version 0.1.0
+ * @version 0.1.1
  * @since   0.1.0
  * @package Etki\MvnoApiClient\SearchCriteria
  * @author  Etki <etki@etki.name>
  */
 class MsisdnSearchCriteria extends AbstractSearchCriteria
 {
+    /**
+     * Default country code to use.
+     *
+     * @since 0.1.1
+     */
+    const DEFAULT_COUNTRY_CODE = 'JEY';
     /**
      * MSISDN wildcard filter.
      *
@@ -52,14 +58,14 @@ class MsisdnSearchCriteria extends AbstractSearchCriteria
      * @type bool
      * @since 0.1.0
      */
-    protected $unassigned;
+    protected $unassigned = false;
     /**
      * Set to true to receive random set of MSISDN.
      *
      * @type bool
      * @since 0.1.0
      */
-    protected $randomSet;
+    protected $randomSet = false;
     /**
      * Set this to specific country code to restrict MSISDNs to specific
      * country.
@@ -67,5 +73,5 @@ class MsisdnSearchCriteria extends AbstractSearchCriteria
      * @type string
      * @since 0.1.0
      */
-    protected $countryCode;
+    protected $countryCode = self::DEFAULT_COUNTRY_CODE;
 }
