@@ -337,7 +337,8 @@ class HighLevelApiClient implements
         while ($retries !== 0) {
             try {
                 $simCard->setMsisdn($msisdn);
-                $this->lowLevelApi->assignNewSim($simCard);
+                $response = $this->lowLevelApi->assignNewSim($simCard);
+                $simCard->setMsisdn($response->getDataItem('msisdn'));
                 return $simCard;
             } catch (ApiOperationFailureException $e) {
                 $msisdn = $this->getNewMsisdn($criteria);
