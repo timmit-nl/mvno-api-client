@@ -311,9 +311,10 @@ class HighLevelApiClient implements
     /**
      * {@inheritdoc}
      *
-     * @param SimCard $simCard Sim card instance.
-     * @param int     $retries Number of retries. Set to negative to get
-     *                         nearly-infinite retries.
+     * @param SimCard $simCard     Sim card instance.
+     * @param string  $countryCode 3-letter country code to search MSISDN in.
+     * @param int     $retries     Number of retries. Set to negative to get
+     *                             nearly-infinite retries.
      *
      * @throws ApiOperationFailureException Thrown if API couldn't assign random
      * msisdn in provided number of retries.
@@ -321,9 +322,15 @@ class HighLevelApiClient implements
      * @return SimCard Sim card instance.
      * @since 0.1.0
      */
-    public function autoAssignNewSim(SimCard $simCard, $retries = 5)
-    {
+    public function autoAssignNewSim(
+        SimCard $simCard,
+        $countryCode = null,
+        $retries = 5
+    ) {
         $criteria = new MsisdnSearchCriteria();
+        if ($countryCode) {
+            $criteria->setCountryCode($countryCode);
+        }
         $msisdn = $this->getNewMsisdn($criteria);
         $simCard = clone $simCard;
         $initialRetries = $retries;
