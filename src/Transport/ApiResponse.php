@@ -147,18 +147,6 @@ class ApiResponse
     }
 
     /**
-     * Returns response message.
-     *
-     * @return string
-     * @since 0.1.0
-     */
-    public function getResponseMessage()
-    {
-        $this->assertIsNotExceptional();
-        return $this->data['responseMessage'];
-    }
-
-    /**
      * Returns response code.
      *
      * @return int
@@ -168,6 +156,32 @@ class ApiResponse
     {
         $this->assertIsNotExceptional();
         return $this->data['responseCode'];
+    }
+
+    /**
+     * Tells if response contains exact response message.
+     *
+     * @return bool
+     * @since 0.1.0
+     */
+    public function hasResponseMessage()
+    {
+        return isset($this->data['responseMessage']);
+    }
+
+    /**
+     * Returns response message, if it has been returned.
+     *
+     * @return string|null
+     * @since 0.1.0
+     */
+    public function getResponseMessage()
+    {
+        $this->assertIsNotExceptional();
+        if (!isset($this->data['responseMessage'])) {
+            return null;
+        }
+        return $this->data['responseMessage'];
     }
 
     /**
@@ -275,10 +289,14 @@ class ApiResponse
         if (!$this->isSuccessful()) {
             $message = 'Request isn\'t typical successful response';
             if (!$this->isExceptional()) {
+                $responseMessage = '<none>';
+                if (!empty($this->data['responseMessage'])) {
+                    $responseMessage = $this->data['responseMessage'];
+                }
                 $message .= sprintf(
                     ' (error code: `%d`, message: `%s`)',
                     $this->data['responseCode'],
-                    $this->data['responseMessage']
+                    $responseMessage
                 );
             }
             throw new BadMethodCallException($message);

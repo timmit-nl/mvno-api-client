@@ -44,10 +44,13 @@ class Manager
      * @return ApiOperationFailureException New exception instance
      * @since 0.1.0
      */
-    public function generateApiOperationException(ApiResponse $response) {
+    public function generateApiOperationException(ApiResponse $response)
+    {
         $errorCode = (int) $response->getResponseCode();
-        $message = $response->getResponseMessage();
-        if (!$message) {
+        $message = null;
+        if ($response->hasResponseMessage()) {
+            $message = $response->getResponseMessage();
+        } elseif (!$message) {
             $message = sprintf(
                 'Operation didn\'t return successful result (error code: `%d`)',
                 $errorCode
