@@ -17,9 +17,36 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class GuzzleTransport implements TransportInterface
 {
+    /**
+     * Guzzle client instance.
+     *
+     * @type Client
+     * @since 0.1.0
+     */
     private $guzzle;
+    /**
+     * Timeout in milliseconds.
+     *
+     * @type int
+     * @since 0.1.0
+     */
     private $timeout = 10000;
+    /**
+     * Proxy string.
+     *
+     * @type string
+     * @since 0.1.0
+     */
     private $proxy;
+
+    /**
+     * Sends HTTP request.
+     *
+     * @param HttpRequest $request Request to send.
+     *
+     * @return void
+     * @since 0.1.0
+     */
     public function sendRequest(HttpRequest $request)
     {
         $guzzle = $this->getGuzzle();
@@ -30,9 +57,18 @@ class GuzzleTransport implements TransportInterface
         );
         $guzzle->post($uri, $headers);
     }
+
+    /**
+     * Sets new timeout.
+     *
+     * @param int $timeout Timeout in milliseconds.
+     *
+     * @return $this Current instance.
+     * @since 0.1.0
+     */
     public function setTimeout($timeout)
     {
-        $normalizedTimeout = intval($timeout);
+        $normalizedTimeout = (int) $timeout;
         if ($normalizedTimeout < 500) {
             $message = sprintf('Invalid timeout `%s`', $timeout);
             throw new TransportException($message);
@@ -40,28 +76,65 @@ class GuzzleTransport implements TransportInterface
         $this->timeout = $normalizedTimeout;
         return $this;
     }
+
+    /**
+     * Returns timeout.
+     *
+     * @return int
+     * @since 0.1.0
+     */
     public function getTimeout()
     {
         return $this->timeout;
     }
+
+    /**
+     * Sets proxy.
+     *
+     * @param string $proxy
+     *
+     * @return void
+     * @since 0.1.0
+     */
     public function setProxy($proxy)
     {
         $this->proxy = $proxy;
     }
+
+    /**
+     * Returns proxy.
+     *
+     * @return string
+     * @since 0.1.0
+     */
     public function getProxy()
     {
         return $this->proxy;
     }
+
+    /**
+     * Adds guzzle plugin.
+     *
+     * @param EventSubscriberInterface $guzzlePlugin Plugin to add.
+     *
+     * @return void
+     * @since 0.1.0
+     */
     public function setPlugin(EventSubscriberInterface $guzzlePlugin)
     {
         $this->getGuzzle()->addSubscriber($guzzlePlugin);
     }
+
+    /**
+     * Retrieves guzzle client.
+     *
+     * @return Client
+     * @since 0.1.0
+     */
     protected function getGuzzle()
     {
         if (!isset($this->guzzle)) {
             $this->guzzle = new Client;
-            $userAgent = 'PHP '.PHP_VERSION.' / Naka Mobile MVNOApiJSONClient';
-            $this->guzzle->setUserAgent($userAgent);
         }
         return $this->guzzle;
     }

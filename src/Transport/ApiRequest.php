@@ -7,6 +7,8 @@ use Etki\MvnoApiClient\Client\Credentials;
 /**
  * This class represents single API request.
  *
+ * @SuppressWarnings(PHPMD.ShortVariableName)
+ *
  * @version 0.1.0
  * @since   0.1.0
  * @package Etki\MvnoApiClient
@@ -27,7 +29,7 @@ class ApiRequest
      * @type array
      * @since 0.1.0
      */
-    protected $data;
+    protected $data = array();
     /**
      * Name of the API method.
      *
@@ -42,6 +44,13 @@ class ApiRequest
      * @since 0.1.0
      */
     protected $credentials;
+    /**
+     * Request ID as required by JSON-RPC.
+     *
+     * @type int|string|null
+     * @since 0.1.0
+     */
+    protected $requestId;
 
     /**
      * Sets data.
@@ -65,6 +74,20 @@ class ApiRequest
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * Adds new data value.
+     *
+     * @param string $key   Item key.
+     * @param mixed  $value Item value.
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setDataItem($key, $value)
+    {
+        $this->data[$key] = $value;
     }
 
     /**
@@ -140,6 +163,31 @@ class ApiRequest
     }
 
     /**
+     * Returns requestId.
+     *
+     * @return int|null|string
+     * @since 0.1.0
+     */
+    public function getRequestId()
+    {
+        return $this->requestId;
+    }
+
+    /**
+     * Sets requestId.
+     *
+     * @param int|null|string $requestId RequestId.
+     *
+     * @return $this Current instance.
+     * @since 0.1.0
+     */
+    public function setRequestId($requestId)
+    {
+        $this->requestId = $requestId;
+        return $this;
+    }
+
+    /**
      * Creates HTTP request.
      *
      * @return HttpRequest
@@ -158,7 +206,13 @@ class ApiRequest
             )
         );
         $request->addHeader('Authorization', 'Basic ' . $dataString);
-        $request->setPostBody(json_encode($this->data));
+        $jsonRequest = array(
+            'jsonrpc' => '2.0',
+            'method' => $this->getMethodName(),
+            'params' => $this->data,
+            'id' => $this->getRequestId(),
+        );
+        $request->setPostBody(json_encode($jsonRequest));
         return $request;
     }
 }

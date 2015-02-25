@@ -14,7 +14,9 @@ use Etki\MvnoApiClient\Log\ApiLoggerInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiRequest;
+use Etki\MvnoApiClient\Transport\ApiRequestCollection;
 use Etki\MvnoApiClient\Transport\ApiResponse;
+use Etki\MvnoApiClient\Transport\ApiResponseCollection;
 use Etki\MvnoApiClient\Transport\CurlTransport;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 
@@ -571,5 +573,29 @@ class HighLevelApiClient implements
             );
         }
         return $this->lowLevelApi->combinedRequest($payload);
+    }
+
+    /**
+     * Performs batch response.
+     *
+     * @param ApiRequestCollection $collection Collection of response to work.
+     *
+     * @return ApiResponseCollection
+     * @since 0.1.0
+     */
+    public function batchRequest(ApiRequestCollection $collection)
+    {
+        return $this->lowLevelApi->makeBatchRequest($collection);
+    }
+
+    /**
+     * Pings service.
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function ping()
+    {
+        return $this->lowLevelApi->ping();
     }
 }

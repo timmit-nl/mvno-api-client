@@ -1,6 +1,6 @@
 {
-  "name": "etki/mvno-api-client",
-  "description": "A simple MVNO API client with limited functionality",
+  "name": "etki/naka-mobile-api-client",
+  "description": "A simple Naka Mobile JSON-RPC client with limited functionality",
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
@@ -16,9 +16,14 @@
     }
   },
   "require": {
-    "psr/log": "~1.0"
+    "psr/log": "~1.0",
+    "graze/guzzle-jsonrpc": "~2.1",
+    "symfony/yaml": "~2.6"
   },
   "require-dev": {
-    "codeception/codeception": "2.1.x-dev"
+    "codeception/codeception": "*"
+  },
+  "config": {
+    "bin-dir": "bin"
   }
 }

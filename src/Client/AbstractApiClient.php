@@ -2,11 +2,16 @@
 
 namespace Etki\MvnoApiClient\Client;
 
+use Etki\MvnoApiClient\Exception\Api\MalformedApiResponseException;
 use Etki\MvnoApiClient\Exception\Api\Manager;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
 use Etki\MvnoApiClient\Exception\Api\ApiRequestFailureException;
 use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
 use Etki\MvnoApiClient\Log\ApiLoggerInterface;
+use Etki\MvnoApiClient\Transport\ApiRequestCollection;
+use Etki\MvnoApiClient\Transport\ApiResponseCollection;
+use Etki\MvnoApiClient\Transport\HttpRequest;
+use Etki\MvnoApiClient\Transport\LayerConverter;
 use Etki\MvnoApiClient\Transport\TransportInterface;
 use Etki\MvnoApiClient\Transport\ApiRequest;
 use Etki\MvnoApiClient\Transport\ApiResponse;
@@ -50,6 +55,13 @@ abstract class AbstractApiClient implements ApiLoggerAwareInterface
      * @since 0.1.0
      */
     protected $loggers = array();
+    /**
+     * Converter instance.
+     *
+     * @type LayerConverter
+     * @since 0.1.0
+     */
+    protected $converter;
 
     /**
      * Sets credentials.
@@ -115,23 +127,103 @@ abstract class AbstractApiClient implements ApiLoggerAwareInterface
     public function callMethod($name, array $data)
     {
         $request = new ApiRequest;
-        $data['apiKey'] = $this->credentials->getApiKey();
         $request->setData($data);
         $request->setMethodName($name);
-        $request->setCredentials($this->credentials);
-        $request->setUrl($this->apiUrl);
-        $httpRequest = $request->createHttpRequest();
-        $httpRequest->addHeader(
-            'Content-Type',
-            'application/x-www-form-urlencoded'
-        );
-        $response = $this->transport->sendRequest($httpRequest);
-        $apiResponse = ApiResponse::createFromHttpResponse($response);
+        return $this->makeRequest($request);
+    }
+
+    /**
+     * Performs new request.
+     *
+     * @param ApiRequest $apiRequest
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function makeRequest(ApiRequest $apiRequest)
+    {
+        $apiRequest->setDataItem('apiKey', $this->credentials->getApiKey());
+        $apiRequest->setRequestId(1);
+        $converter = $this->getConverter();
+        $jsonRpcRequest = $converter->createJsonRpcRequest($apiRequest);
+        $httpRequest = $this->createRequestTemplate();
+        $httpRequest->setPostBody(json_encode($jsonRpcRequest));
+        $httpResponse = $this->transport->sendRequest($httpRequest);
+        $jsonRpcResponse = json_decode($httpResponse->getBody(), true);
+        if (!$jsonRpcResponse) {
+            throw new MalformedApiResponseException($httpResponse->getBody());
+        }
+        $apiResponse = $converter->createApiResponse($jsonRpcResponse);
         foreach ($this->loggers as $logger) {
-            $logger->log($request, $apiResponse);
+            $logger->log($apiRequest, $apiResponse);
         }
         $this->validateResponse($apiResponse);
         return $apiResponse;
+    }
+
+    /**
+     * Performs batch request.
+     *
+     * @param ApiRequestCollection $requestCollection Request collection.
+     *
+     * @return ApiResponseCollection Responses.
+     * @since 0.1.0
+     */
+    public function makeBatchRequest(ApiRequestCollection $requestCollection)
+    {
+        $converter = $this->getConverter();
+        $requests = array();
+        foreach ($requestCollection->getRequests() as $request) {
+            $request->setDataItem('apiKey', $this->credentials->getApiKey());
+            $jsonRpcRequest = $converter->createJsonRpcRequest($request);
+            $requests[] = $jsonRpcRequest;
+        }
+        $httpRequest = $this->createRequestTemplate();
+        $httpRequest->setPostBody(json_encode($requests));
+        $httpResponse = $this->transport->sendRequest($httpRequest);
+        $batchJsonRpcResponse = json_decode($httpResponse->getBody(), true);
+        if (!$batchJsonRpcResponse) {
+            throw new MalformedApiResponseException($httpResponse->getBody());
+        }
+        $responseCollection = new ApiResponseCollection;
+        foreach ($batchJsonRpcResponse as $jsonRpcResponse) {
+            $apiResponse = $converter->createApiResponse($jsonRpcResponse);
+            $responseCollection->addResponse($apiResponse);
+        }
+        return $responseCollection;
+    }
+
+    /**
+     * Creates request template.
+     *
+     * @return HttpRequest
+     * @since 0.1.0
+     */
+    protected function createRequestTemplate()
+    {
+        $request = new HttpRequest;
+        $contentType = 'application/x-www-form-urlencoded';
+        $request->addHeader('Content-Type', $contentType);
+        $username = $this->credentials->getUsername();
+        $password = $this->credentials->getPassword();
+        $auth = base64_encode($username . ':' . $password);
+        $request->addHeader('Authorization', 'Basic ' . $auth);
+        $request->setUrl($this->apiUrl);
+        return $request;
+    }
+
+    /**
+     * Returns converter.
+     *
+     * @return LayerConverter
+     * @since 0.1.0
+     */
+    protected function getConverter()
+    {
+        if (!isset($this->converter)) {
+            $this->converter = new LayerConverter;
+        }
+        return $this->converter;
     }
 
     /**

@@ -5,6 +5,8 @@ namespace Etki\MvnoApiClient\Client;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
+use Etki\MvnoApiClient\Transport\ApiRequest;
+use Etki\MvnoApiClient\Transport\ApiRequestCollection;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
@@ -404,14 +406,26 @@ class LowLevelApiClient extends AbstractApiClient implements
      */
     public function combinedRequest(array $requests)
     {
-        $data = array(
-            'methods' => array(),
-            'parameters' => array(),
-        );
+        $collection = new ApiRequestCollection;
         foreach ($requests as $tuple) {
-            $data['methods'][] = $tuple['method'];
-            $data['parameters'][] = $tuple['parameters'] ? $tuple['parameters'] : array();
+            $request = new ApiRequest;
+            $request->setMethodName($tuple['method']);
+            $parameters = $tuple['parameters'] ? $tuple['parameters'] : array();
+            $request->setData($parameters);
+            $request->setRequestId($collection->getSize() + 1);
+            $collection->addRequest($request);
         }
-        return $this->callMethod('combinedRequest', $data);
+        return $this->makeBatchRequest($collection);
+    }
+
+    /**
+     * Pings service.
+     *
+     * @return ApiResponse
+     * @since 0.1.0
+     */
+    public function ping()
+    {
+        return $this->callMethod('ping', array());
     }
 }

@@ -5,6 +5,7 @@ namespace Etki\MvnoApiClient\Transport;
 use Etki\MvnoApiClient\Exception\Api\MalformedApiRequestException;
 use DateTime;
 use BadMethodCallException;
+use Etki\MvnoApiClient\Exception\Api\MalformedApiResponseException;
 
 /**
  * This class represents API response.
@@ -31,6 +32,30 @@ class ApiResponse
      * @since 0.1.0
      */
     protected $dateTime;
+
+    /**
+     * Error code.
+     *
+     * @type int
+     * @since 0.1.0
+     */
+    protected $errorCode;
+
+    /**
+     * Error message.
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    protected $errorMessage;
+    /**
+     * Request ID.
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    protected $requestId;
+
     /**
      * Constant containing string representation of exception cause for
      * server-generated exceptions.
@@ -58,25 +83,79 @@ class ApiResponse
      */
     public function setData(array $data)
     {
-        if (isset($data['exception']) || isset($data['fault'])) {
-            $requiredKeys = array('exception', 'fault',);
-        } else {
-            $requiredKeys = array(
-                'responseStatus',
-                'responseCode',
-                'timestamp',
-            );
-        }
-        $missingKeys = array();
-        foreach ($requiredKeys as $key) {
-            if (!isset($data[$key])) {
-                $missingKeys[] = $key;
-            }
-        }
-        if ($missingKeys) {
-            throw new MalformedApiRequestException($missingKeys);
-        }
         $this->data = $data;
+    }
+
+    /**
+     * Sets error code.
+     *
+     * @param int $errorCode
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    /**
+     * Retrieves error code.
+     *
+     * @return int
+     * @since 0.1.0
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * Sets error message.
+     *
+     * @param string $message Error message.
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setErrorMessage($message)
+    {
+        $this->errorMessage = $message;
+    }
+
+    /**
+     * Retrieves error message.
+     *
+     * @return string
+     * @since 0.1.0
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
+    }
+
+    /**
+     * Sets request ID.
+     *
+     * @param int|string $requestId Request ID.
+     *
+     * @return void
+     * @since 0.1.0
+     */
+    public function setRequestId($requestId)
+    {
+        $this->requestId = $requestId;
+    }
+
+    /**
+     * Returns request ID.
+     *
+     * @return string
+     * @since 0.1.0
+     */
+    public function getRequestId()
+    {
+        return $this->requestId;
     }
 
     /**
@@ -119,7 +198,6 @@ class ApiResponse
      */
     public function hasDataItem($itemKey)
     {
-        $this->assertDataHasBeenSet();
         return array_key_exists($itemKey, $this->data);
     }
 
@@ -131,8 +209,7 @@ class ApiResponse
      */
     public function isExceptional()
     {
-        $this->assertDataHasBeenSet();
-        return isset($this->data['exception']);
+        return isset($this->errorCode);
     }
 
     /**
@@ -143,7 +220,7 @@ class ApiResponse
      */
     public function isSuccessful()
     {
-        return !$this->isExceptional() && $this->data['responseStatus'];
+        return !$this->isExceptional();
     }
 
     /**
@@ -342,16 +419,31 @@ class ApiResponse
     /**
      * Creates API response from HTTP response.
      *
-     * @param HttpResponse $response Original HTTP response.
+     * @param string $response Original HTTP response body.
      *
      * @return ApiResponse Generated response.
      * @since 0.1.0
      */
-    public static function createFromHttpResponse(HttpResponse $response)
+    public static function createFromPlainText($response)
     {
         $apiResponse = new ApiResponse;
-        $data = json_decode($response->getBody(), true);
-        $apiResponse->setData($data);
+        $data = json_decode($response, true);
+        if (!$data || (!isset($data['error']) && !isset($data['result']))
+            || !isset($data['id'])
+        ) {
+            throw new MalformedApiResponseException($response);
+        }
+        $apiResponse->setRequestId($data['id']);
+        if (isset($data['error'])) {
+            $error = $data['error'];
+            if (isset($error['data'])) {
+                $apiResponse->setData($error['data']);
+            }
+            $apiResponse->setErrorCode($error['code']);
+            $apiResponse->setErrorMessage($error['message']);
+        } else {
+            $apiResponse->setData($data['result']);
+        }
         return $apiResponse;
     }
 }

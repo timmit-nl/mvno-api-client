@@ -1,0 +1,45 @@
+#!/usr/bin/env php
+<?php
+
+use Etki\MvnoApiClient\Client;
+use Etki\MvnoApiClient\Client\Credentials;
+use Etki\MvnoApiClient\Transport\ApiRequest;
+use Etki\MvnoApiClient\Transport\CurlTransport;
+use Symfony\Component\Yaml\Yaml;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$configurationFile = __DIR__ . '/configuration.yml';
+
+if (!file_exists($configurationFile)) {
+    echo 'Couldn\'t find `configuration.yml` to make a ping request';
+    return;
+}
+
+$configuration = Yaml::parse(file_get_contents($configurationFile));
+
+$credentials = new Credentials;
+$credentials->setApiKey($configuration['apiKey']);
+$credentials->setUsername($configuration['username']);
+$credentials->setPassword($configuration['password']);
+
+$apiUrl = 'https://api.nakasolutions.com/mvno/v3/json-rpc/';
+$apiUrl = isset($configuration['apiUrl']) ? $configuration['apiUrl'] : $apiUrl;
+$proxy = isset($configuration['proxy']) ? $configuration['proxy'] : null;
+
+$transport = new CurlTransport();
+if ($proxy) {
+    $transport->setProxy($proxy);
+}
+$client = new Client($apiUrl, $credentials, $transport);
+var_dump($client->ping());
+$request = new ApiRequest;
+$request->setMethodName('ping');
+$requests = array();
+
+for ($i = 1; $i <= 10; $i++) {
+    $clone = clone $request;
+    $clone->setRequestId($i);
+    $requests[] = $clone;
+}
+var_dump($client->combinedRequest($requests));
