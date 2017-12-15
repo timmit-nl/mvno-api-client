@@ -10,6 +10,7 @@ use Etki\MvnoApiClient\Transport\ApiRequestCollection;
 use Etki\MvnoApiClient\Transport\ApiResponse;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\Customer;
+use Etki\MvnoApiClient\Entity\LocalMsisdn;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use InvalidArgumentException;
 
@@ -212,7 +213,24 @@ class LowLevelApiClient extends AbstractApiClient implements
     }
 
     /**
-     * Assigns new sim card to customer.
+     * get puk code of simcard
+     *
+     * @param SimCard $simCard Sim card definition.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function getPukSimCard(SimCard $simCard)
+    {
+        $simCard->assertPropertiesSet(array('iccid',));
+        $data = array(
+            'iccid' => $simCard->getIccid(),
+        );
+        return $this->callMethod('getCard', $data);
+    }
+
+    /**
+     * get puk code of simcard
      *
      * @param SimCard $simCard Sim card definition.
      *
@@ -428,4 +446,102 @@ class LowLevelApiClient extends AbstractApiClient implements
     {
         return $this->callMethod('ping', array());
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $subscriptionName subscriptionName.
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function activateSubscription($msisdn,$subscriptionName)
+    {
+        $data = array(
+            'msisdn' => $msisdn,
+            'subscriptionName' => $subscriptionName,
+            'packageId' => NULL,
+        );
+        return $this->callMethod('activateSubscription', $data);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $subscriptionName subscriptionName.
+     * @param string $msisdn Sim card MSISDN.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function activatePackage($msisdn,$packageId)
+    {
+        $data = array(
+            'msisdn' => $msisdn,
+            'subscriptionName' => '',
+            'packageId' => $packageId,
+        );
+        return $this->callMethod('activateSubscription', $data);
+    }
+
+    /**
+     * Creates customer,
+     *
+     * @param Customer $customer Customer structure.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function addLocalMsisdn(LocalMsisdn $localMsisdn)
+    {
+        $data = array(
+            'msisdn' => $localMsisdn->getMsisdn(),
+            'countryCode' => $localMsisdn->getCountryCode(),
+            'verifyOnly' => $localMsisdn->getVerifyOnly(),
+        );
+        if($localMsisdn->getLocalMsisdn()){
+            $data['newMsisdn'] = $localMsisdn->getLocalMsisdn();
+        }
+        $data['newMsisdn'] = '';
+        return $this->callMethod('addMsisdn', $data);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdn Sim card MSISDN.
+     * @param string $displayedMsisdn displayedMsisdn.
+     * @param boolean $cliShow cliShow.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function setCliShow($msisdn,$cliShow=true,$displayedMsisdn='')
+    {
+        $data = array(
+            'msisdn' => $msisdn,
+            'cliShow' => $cliShow,
+            'displayedMsisdn' => $displayedMsisdn,
+        );
+        return $this->callMethod('setCliShow', $data);
+    }
+
+    /**
+     * Clears cache,
+     *
+     * @param string $method.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function clearCache($method)
+    {
+        $data = array(
+            'method' => $method,
+        );
+        return $this->callMethod('clearCache', $data);
+    }
+
+
 }

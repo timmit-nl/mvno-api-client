@@ -8,7 +8,9 @@ use Etki\MvnoApiClient\Entity\RateData;
 use Etki\MvnoApiClient\Entity\SimCard;
 use Etki\MvnoApiClient\Entity\SimCardBalance;
 use Etki\MvnoApiClient\Entity\Subscription;
+use Etki\MvnoApiClient\Entity\LocalMsisdn;
 use Etki\MvnoApiClient\Exception\Api\ApiOperationFailureException;
+use Etki\MvnoApiClient\Exception\Api\MalformedApiResponseException;
 use Etki\MvnoApiClient\Log\ApiLoggerAwareInterface;
 use Etki\MvnoApiClient\Log\ApiLoggerInterface;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
@@ -96,8 +98,20 @@ class HighLevelApiClient implements
         );
         try {
             $apiResponse = $this->lowLevelApi->getCustomer($criteria);
-        } catch (ApiOperationFailureException $e) {
+            //var_dump($apiResponse);
+        } catch (\Exception $e) {
+            // var_dump(($e instanceof ApiOperationFailureException || $e instanceof MalformedApiResponseException));
+            // var_dump($e);
+            // var_dump($apiResponse);
+        // } catch (ApiOperationFailureException $e) {
+            if ($e instanceof ApiOperationFailureException || $e instanceof MalformedApiResponseException) {
+               // It's either an A or B exception.
+            } else {
+                // Keep throwing it.
+                throw $e;
+            }
         }
+        //var_dump($apiResponse);
         if (!isset($apiResponse) || !$apiResponse->getDataItem('customer')) {
             $apiResponse = $this->lowLevelApi->createCustomer($customer);
         }
@@ -221,11 +235,12 @@ class HighLevelApiClient implements
      * {@inheritdoc}
      *
      * @param SimCard $simCard Sim card definition.
+     * @param string  $countryCode 3-letter country code to search MSISDN in.
      *
      * @return ApiResponse Response.
      * @since 0.1.0
      */
-    public function addCustomerSimCard(SimCard $simCard)
+    public function addCustomerSimCard(SimCard $simCard, $countryCode = null)
     {
         $simCard = clone $simCard;
         $simCard->setVerifyOnly(false);
@@ -233,11 +248,29 @@ class HighLevelApiClient implements
             $msisdn = $simCard->getMsisdn();
             $this->lowLevelApi->assignNewSim($simCard);
         } else {
-            $simCard = $this->autoAssignNewSim($simCard);
+            $simCard = $this->autoAssignNewSim($simCard,$countryCode);
             $msisdn = $simCard->getMsisdn();
         }
         $this->lowLevelApi->activateInitialSubscription($msisdn);
-        return $this->lowLevelApi->assignNewSim($simCard);
+        return $simCard;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param SimCard $simCard Sim card definition.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function getPukSimCard(SimCard &$simCard)
+    {
+        $response = $this->lowLevelApi->getPukSimCard($simCard);
+        $data = $response->getData();
+        if(!empty($data) && !empty($data['card']) && !empty($data['card']['puk'])){
+            $simCard->setPuk($data['card']['puk']);
+        }
+        return $simCard;
     }
 
     /**
@@ -598,4 +631,91 @@ class HighLevelApiClient implements
     {
         return $this->lowLevelApi->ping();
     }
+
+    /**
+     * Recharges account balance.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param int    $amount      Money (in x10000 of nominal).
+     * @param int    $serviceCode Service code.
+     * @param null   $message     Additional message.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function addLocalMsisdn(LocalMsisdn $localMsisdn)
+    {
+        $apiResponse = $this->lowLevelApi->addLocalMsisdn($localMsisdn);
+        // var_dump($apiResponse);
+        $localMsisdn->setLocalMsisdn($apiResponse->getDataItem('localNumber'));
+        return $localMsisdn;
+    }
+
+    /**
+     * activates a subscription to a msisdn.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param string $subscriptionName
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function activateSubscription($msisdn,$subscriptionName){
+        $apiResponse = $this->lowLevelApi->activateSubscription($msisdn,$subscriptionName);
+
+        return $apiResponse;
+    }
+
+    /**
+     * activates a package to a msisdn.
+     *
+     * @param string $msisdn      Sim card MSISDN.
+     * @param string $packageId
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function activatePackage($msisdn,$packageId){
+        $apiResponse = $this->lowLevelApi->activatePackage($msisdn,$packageId);
+
+        return $apiResponse;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdn Sim card MSISDN.
+     * @param boolean $cliShow cliShow.
+     * @param string $displayedMsisdn displayedMsisdn.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function setCliShow($msisdn,$cliShow=true,$displayedMsisdn=''){
+        $apiResponse = $this->lowLevelApi->setCliShow($msisdn,$cliShow,$displayedMsisdn);
+
+        return $apiResponse;
+    }
+
+    /**
+     * Clear cache.
+     *
+     * @param string $method      method to clear cache
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function clearCache($method){
+        $apiResponse = $this->lowLevelApi->clearCache($method);
+        return $apiResponse;
+    }
+
+
+
 }

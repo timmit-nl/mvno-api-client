@@ -202,4 +202,26 @@ interface LowLevelApiClientInterface
      * @since 0.1.0
      */
     public function getSubscriptions($msisdn);
+
+    /**
+     * Set SIM CLI (caller line identification) status for outgoing calls and optionally pick a secondary MSISDN as permanently displayed number for a multi-imsi card.
+     *
+     * @param string $msisdn Sim card MSISDN.
+     * @param string $displayedMsisdn displayedMsisdn.
+     * @param boolean $cliShow cliShow.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function setCliShow($msisdn,$cliShow=true,$displayedMsisdn='');
+
+    /**
+     * Clear cache,
+     *
+     * @param string $method.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
+    public function clearCache($method);
 }

@@ -5,6 +5,7 @@ namespace Etki\MvnoApiClient\Client;
 use Etki\MvnoApiClient\Entity\Customer;
 use Etki\MvnoApiClient\Entity\Address;
 use Etki\MvnoApiClient\Entity\SimCard;
+use Etki\MvnoApiClient\Entity\LocalMsisdn;
 use Etki\MvnoApiClient\SearchCriteria\MsisdnSearchCriteria;
 use Etki\MvnoApiClient\SearchCriteria\CustomerSearchCriteria;
 use Etki\MvnoApiClient\Transport\ApiResponse;
@@ -259,4 +260,69 @@ interface HighLevelApiClientInterface
      * @since 0.1.0
      */
     public function getNewMsisdn(MsisdnSearchCriteria $criteria = null);
+
+    /**
+     * Assigns new local msisdn to customer.
+     *
+     * @param LocalMsisdn $localMsisdn LocalMsisdn entity instance.
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function addLocalMsisdn(LocalMsisdn $localMsisdn);
+
+    /**
+     * activates a subscription to a msisdn.
+     *
+     * @param string $msisdn
+     * @param string $subscriptionName
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function activateSubscription($msisdn,$subscriptionName);
+
+    /**
+     * activates a package to a msisdn.
+     *
+     * @param string $msisdn
+     * @param string $packageId
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function activatePackage($msisdn,$packageId);
+
+    /**
+     * Set SIM CLI (caller line identification) status for outgoing calls and optionally pick a secondary MSISDN as permanently displayed number for a multi-imsi card.
+     *
+     * @param string $msisdn Sim card MSISDN.
+     * @param string $displayedMsisdn displayedMsisdn.
+     * @param boolean $cliShow cliShow.
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function setCliShow($msisdn,$cliShow=true,$displayedMsisdn='');
+
+    /**
+     * Clear cache.
+     *
+     * @param string $method      method to clear cache
+     *
+     * @throws ApiOperationFailureException
+     *
+     * @return ApiResponse API response.
+     * @since 0.1.0
+     */
+    public function clearCache($method);
+
 }

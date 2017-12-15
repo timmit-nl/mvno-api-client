@@ -144,12 +144,18 @@ abstract class AbstractApiClient implements ApiLoggerAwareInterface
     {
         $apiRequest->setDataItem('apiKey', $this->credentials->getApiKey());
         $apiRequest->setRequestId(1);
+        // var_dump($apiRequest);
         $converter = $this->getConverter();
         $jsonRpcRequest = $converter->createJsonRpcRequest($apiRequest);
         $httpRequest = $this->createRequestTemplate();
+        // var_dump(json_encode($jsonRpcRequest));
         $httpRequest->setPostBody(json_encode($jsonRpcRequest));
+        var_dump($httpRequest);
+
         $httpResponse = $this->transport->sendRequest($httpRequest);
+        // var_dump($httpResponse);
         $jsonRpcResponse = json_decode($httpResponse->getBody(), true);
+
         if (!$jsonRpcResponse) {
             throw new MalformedApiResponseException($httpResponse->getBody());
         }
@@ -158,6 +164,7 @@ abstract class AbstractApiClient implements ApiLoggerAwareInterface
             $logger->log($apiRequest, $apiResponse);
         }
         $this->validateResponse($apiResponse);
+        // var_dump($apiResponse);
         return $apiResponse;
     }
 
