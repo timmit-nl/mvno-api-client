@@ -263,9 +263,32 @@ class HighLevelApiClient implements
      * @return ApiResponse Response.
      * @since 0.1.0
      */
+    public function getCard(SimCard &$simCard)
+    {
+        $response = $this->lowLevelApi->getCard($simCard);
+        $data = $response->getData();
+        if(!empty($data) && !empty($data['card'])){
+            if(!empty($data['card']['puk'])){
+                $simCard->setPuk($data['card']['puk']);
+            }
+            if(!empty($data['card']['imsi'])){
+                $simCard->setImsi($data['card']['imsi']);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param SimCard $simCard Sim card definition.
+     *
+     * @return ApiResponse Response.
+     * @since 0.1.0
+     */
     public function getPukSimCard(SimCard &$simCard)
     {
-        $response = $this->lowLevelApi->getPukSimCard($simCard);
+        $response = $this->lowLevelApi->getCard($simCard);
         $data = $response->getData();
         if(!empty($data) && !empty($data['card']) && !empty($data['card']['puk'])){
             $simCard->setPuk($data['card']['puk']);

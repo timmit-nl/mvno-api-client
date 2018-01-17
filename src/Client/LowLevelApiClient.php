@@ -20,7 +20,7 @@ use InvalidArgumentException;
  * @version 0.1.1
  * @since   0.1.0
  * @package Etki\MvnoApiClient\Client
- * @author  Etki <etki@etki.name>
+ * @author  Etki <etki@etki.name> 
  */
 class LowLevelApiClient extends AbstractApiClient implements
     LowLevelApiClientInterface
@@ -220,7 +220,7 @@ class LowLevelApiClient extends AbstractApiClient implements
      * @return ApiResponse Response.
      * @since 0.1.0
      */
-    public function getPukSimCard(SimCard $simCard)
+    public function getCard(SimCard $simCard)
     {
         $simCard->assertPropertiesSet(array('iccid',));
         $data = array(
