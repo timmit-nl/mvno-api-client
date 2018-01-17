@@ -52,6 +52,13 @@ class SimCard extends AbstractEntity
      */
     protected $puk;
     /**
+     * IMSI code.
+     *
+     * @type string
+     * @since 0.1.0
+     */
+    protected $imsi;
+    /**
      * Whether verify record or not,
      *
      * @type bool
