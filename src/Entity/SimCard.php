@@ -65,4 +65,11 @@ class SimCard extends AbstractEntity
      * @since 0.1.0
      */
     protected $verifyOnly = false;
+    /**
+     * Whether provisioned or not,
+     *
+     * @type bool
+     * @since 0.1.0
+     */
+    protected $provisioned = false;
 }

@@ -119,7 +119,7 @@ class HighLevelApiClient implements
         $address->setCustomerId($customerData['id']);
         $customer->setId($customerData['id']);
         $addressResponse = $this->addAddress($address);
-        $approvalResponse = $this->approveCustomer($customerData['id']);
+        // $approvalResponse = $this->approveCustomer($customerData['id']);
         return $customer;
     }
 
@@ -274,6 +274,13 @@ class HighLevelApiClient implements
             if(!empty($data['card']['imsi'])){
                 $simCard->setImsi($data['card']['imsi']);
             }
+            // if(!empty($data['card']['provisioned'])){
+            //     $simCard->setProvisioned($data['card']['provisioned']);
+            // }
+            if(!empty($data['card']['assignedMsisdn'])){
+                $simCard->setMsisdn($data['card']['assignedMsisdn']);
+            }
+            return $data['card'];
         }
         return $data;
     }
@@ -739,6 +746,58 @@ class HighLevelApiClient implements
         return $apiResponse;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdnSender MSISDN.
+     * @param string|array $msisdnDestination MSISDN.
+     * @param string $message message.
+     * @param string $dcsCharset dcsCharset.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function sendBulkSMS($msisdnSender,$msisdnDestination,$message,$dcsCharset=''){
+        if(!is_array($msisdnDestination)){
+            $arrayMsisdnDestination = array();
+            $arrayMsisdnDestination[] = $msisdnDestination;
+        } else {
+            $arrayMsisdnDestination = $msisdnDestination;
+        }
 
+        switch($dcsCharset){
+            case '7bit':
+            case '8bit':
+            case 'ucs2':
+                break;
+            default:
+                $dcsCharset = 'auto';
+                break;
+        }
+
+        $apiResponse = $this->lowLevelApi->sendBulkSMS($msisdnSender,$arrayMsisdnDestination,$message,$dcsCharset);
+        return $apiResponse;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdn MSISDN.
+     * @param boolean $newStatus true to unblock, false to block.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function setSimStatus($msisdn,$newStatus=true){
+        if($newStatus==false){
+            $newStatus = false;
+        } else {
+            $newStatus = true;
+        }
+
+        $apiResponse = $this->lowLevelApi->setSimStatus($msisdn,$newStatus);
+        return $apiResponse;
+    }
 
 }

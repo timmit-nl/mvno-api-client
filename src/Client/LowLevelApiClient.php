@@ -544,4 +544,44 @@ class LowLevelApiClient extends AbstractApiClient implements
     }
 
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdnSender MSISDN.
+     * @param array $msisdnDestination MSISDN.
+     * @param string $message message.
+     * @param string $dcsCharset dcsCharset.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function sendBulkSMS($msisdnSender,$msisdnDestination,$message,$dcsCharset='auto'){
+        $data = array(
+            'account' => null,
+            'dcsCharset' => $dcsCharset,
+            'destinations' => $msisdnDestination,
+            'message' => $message,
+            'sender' => $msisdnSender,
+        );
+        return $this->callMethod('bulkSMS', $data);
+    }
+
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $msisdn MSISDN.
+     * @param boolean $newStatus true to unblock, false to block.
+     *
+     * @return ApiResponse Data.
+     * @since 0.1.0
+     */
+    public function setSimStatus($msisdn,$newStatus=true){
+        $data = array(
+            'msisdn' => $msisdn,
+            'newStatus' => $newStatus,
+        );
+        return $this->callMethod('setSimStatus', $data);
+    }
+
 }

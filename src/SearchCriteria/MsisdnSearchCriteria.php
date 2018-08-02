@@ -30,7 +30,7 @@ class MsisdnSearchCriteria extends AbstractSearchCriteria
      *
      * @since 0.1.1
      */
-    const DEFAULT_COUNTRY_CODE = 'JEY';
+    const DEFAULT_COUNTRY_CODE = 'NLD';
     /**
      * MSISDN wildcard filter.
      *

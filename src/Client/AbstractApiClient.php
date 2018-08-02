@@ -144,11 +144,11 @@ abstract class AbstractApiClient implements ApiLoggerAwareInterface
     {
         $apiRequest->setDataItem('apiKey', $this->credentials->getApiKey());
         $apiRequest->setRequestId(1);
-        // var_dump($apiRequest);
+
         $converter = $this->getConverter();
         $jsonRpcRequest = $converter->createJsonRpcRequest($apiRequest);
         $httpRequest = $this->createRequestTemplate();
-        // var_dump(json_encode($jsonRpcRequest));
+
         $httpRequest->setPostBody(json_encode($jsonRpcRequest));
         // var_dump($httpRequest);
 
